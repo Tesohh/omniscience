@@ -1,12 +1,15 @@
 ALIASES FOR DIRECTORIES...
-* TODO define a config file "omni.toml" that counts as project root
+* DONE define a config file "omni.toml" that counts as project root
+CLOSED: [2025-12-26 Fri 17:09]
 keys:
 - project name
 - directory aliases
 - (user) nodes_path = nodes.toml
 - db_path = db.csv (??)
   (db.csv is the ultimate source of truth for linking.)
-* TODO choose a database format (csv, toml, json...)
+* DONE choose a database format (csv, toml, json...)
+CLOSED: [2025-12-26 Fri 17:10]
+settled on toml
 * TODO what do we even want to store in the db?
 + i'm in a directory called ~notes~
 + ~omni new "My Note.typ"~
@@ -18,8 +21,8 @@ keys:
     + one of these aliases is the slug: ~my-note~
   + other metadata such as format, kind of LOCATION (note, directory, heading in other note..)
 
-#+BEGIN_SRC java
-@omni.matrix.operations.addition // to full heading path slug [[omni:matrix/operations/addition]]
+#+BEGIN_SRC typst
+@omni.matrix:operations.addition // to full heading path slug [[omni:matrix/operations/addition]]
 @omni.matrix:addition // to typst label (which acts as alias for heading) OR heading slug [[omni:matrix#addition]]
 @omni.matrix // to file [[omni:matrix]]
 @omni.root.linear-algebra.matrix // to file /Linear Algebra/matrix
@@ -34,5 +37,119 @@ think about how files can be linked to:
 
   WE SHOULD THEN HAVE TWO DB's: A USER MODIFIABLE ONE, AND A DYNAMIC DB BUILT FROM THE USER FACING ONE AND ALL OTHER DATA GATHERED.
 
--
 * TODO perhaps look into how zettelkasten id's should work.
+* TODO figure out how links are resolved
+eg. Typst links are divided in four parts:
+1. ~@omni~ preamble
+2. ~.<filename>~ | ~.<path>.<filename>~ File
+3. ~.<path_to_heading>.<heading>~ | ~:<heading>~ Heading/label (optional)
+4. ~[<alias>]~ (optional)
+   
+Say our starting situation is:
+#+begin_src
+notes/
+  cs/ 
+    c/
+      matrix.md
+    discrete-math/
+      proofs/
+        proof-by-induction.typ
+    linear-algebra/
+      matrix.typ
+    overview.md
+  omni.toml
+#+end_src
+
+and ~db.toml~ is:
+#+begin_src toml
+[node.id1]
+path = "cs/c/matrix.md"
+kind = "file"
+names = ["matrix"]
+
+[node.id2]
+path = "cs/discrete-math/proofs/proof-by-induction.typ"
+kind = "file"
+names = ["proof-by-induction", "induction"]
+
+[node.id3]
+path = "cs/linear-algebra/matrix.typ"
+kind = "file"
+names = ["matrix", "matrices"]
+
+[node.id4]
+path = "cs/linear-algebra/matrix.typ"
+kind = "heading"
+heading = "operations"
+names = ["matrix-operations"]
+
+[node.id4]
+path = "cs/overview.md"
+kind = "file"
+names = ["overview"]
+#+end_src
+
+So say we have a link like: ~@omni.matrix:addition[Matrix Addition]~
+0. recognize that it is actually an omni link by the @omni tag. and it is of the form: ~name:heading[alias]~
+1. ok, the name provided is ~matrix~. go read the .db.toml and find the id related to the name ="matrix"=
+2. we have a conflict: we have two files with name "matrix". 
+   that in itself is not a problem, but referring with just ~matrix~ is wrong,
+   and will result in an error, with a hint suggesting to use a path.
+   
+Next: ~@omni.matrices~
+0. the link is of form ~name~
+1. now search the name ~matrices~ in nodes 
+2. final resolved link =linear-algebra/matrix.typ=
+   
+Next: ~@omni.linalg.matrix:addition~
+0. the link is of form ~path.name:heading~
+1. check ~Config.dir_aliases~. ~linalg~ -> ~"cs/linear-algebra"~
+2. Alright, now search the name ~matrix~ in nodes where the path *starts with* ~linear-algebra~ 
+   (so it will ignore ~c~)
+3. Now, what is the hierarchy of ~addition~?
+   - it's typst, it might just be a label. Is it? yes, just return ~addition~
+4. final resolved link =linear-algebra/matrix.typ#addition=
+   
+Next: ~@omni.cs.discrete-math.proof-by-induction~
+0. the link is of form ~path.name~
+1. ~cs~ and ~discrete-math~ are not aliases, so the path resolves to ~cs/discrete-math~
+2. find the node in the db with name ~proof-by-induction~ where path *starts with* ~cs/discrete-math~
+3. final resolved link =cs/discrete-math/proofs/proof-by-induction=
+   
+Next: ~@omni-id.id2~
+0. the link is of form ~id~
+1. final resolved link =cs/c/matrix.md=
+   
+Next: ~@omni.matrix-operations:addition~
+0. the link is of form ~name:heading~
+1. find the node in db with name ~matrix-operations~
+2. the node in question is ~cs/linear-algebra/matrix.typ#operations~
+3. now append the ~heading~ /(which keep in mind may or may not exist)/ to the final link
+4. final resolved link =cs/linear-algebra/matrix.typ#operations#addition=.
+
+Next: ~@omni.dima.proofs.induction:other.strong-induction~ \equiv ~[[omni:dima/proofs/induction#other#strong-induction]]~
+0. the link is of form ~path.name:heading_path.heading~
+1. check ~Config.dir_aliases~. ~dima~ -> ~"cs/discrete-math"~
+2. append ~proofs~ to the dir to get ~cs/discrete-math/proofs~
+3. Alright, now search the name ~induction~ in nodes where the path *starts with* ~cs/discrete-math/proofs~ 
+4. now for the heading path. it's ~#other#strong-induction~. 
+   in typst, you should really use labels for this. but this would also match
+   #+begin_src typ
+   = Other <other>
+   == Strong Induction <strong>
+   #+end_src
+   But it wuld be best to use ~#strong~ or ~#other#strong~.
+   The header paths are mostly for obsidian wikilinks as those support it.
+   Pretty much in typst, headings correspond either to labels or a slug-ized version of the real heading.
+   OR we could force every heading to have a label...
+5. 
+   
+FINAL STEP:
+all links must be normalized before using in html.
+1. Check if the link resolves to any location.
+   - Yes -> proceed
+   - No  -> stop here and display a gray link that points to nothing.
+2. url's want a single ~#id~ hash thing. so ~#operations#addition~ becomes ~#addition~
+   (KEEP IN MIND: if we have two different headings called addition, the html link will point to the first one it finds.
+   no big deal, that's what it does in obsidian too. we could also throw an error in that case.)
+* TODO look into WASM for writing a function for resolving links that typst can use too
