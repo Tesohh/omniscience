@@ -142,8 +142,8 @@ Next: ~@omni.dima.proofs.induction:other.strong-induction~ \equiv ~[[omni:dima/p
    The header paths are mostly for obsidian wikilinks as those support it.
    Pretty much in typst, headings correspond either to labels or a slug-ized version of the real heading.
    OR we could force every heading to have a label...
-5. 
-   
+5. final resolved link =cs/discrete-math/proofs/proof-by-induction.typ#other#strong-induction=
+
 FINAL STEP:
 all links must be normalized before using in html.
 1. Check if the link resolves to any location.
@@ -152,4 +152,7 @@ all links must be normalized before using in html.
 2. url's want a single ~#id~ hash thing. so ~#operations#addition~ becomes ~#addition~
    (KEEP IN MIND: if we have two different headings called addition, the html link will point to the first one it finds.
    no big deal, that's what it does in obsidian too. we could also throw an error in that case.)
+* TODO are we sure that we need the ~heading_path.heading~?
+because in typst we can just use labels for this.
+but it might be useful for other formats, so i guess we should keep it?
 * TODO look into WASM for writing a function for resolving links that typst can use too
