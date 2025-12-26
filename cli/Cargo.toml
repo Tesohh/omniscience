@@ -7,3 +7,6 @@ edition = "2024"
 clap = { version = "4.5.53", features = ["derive"] }
 miette.workspace = true
 thiserror.workspace = true
+serde.workspace = true
+toml.workspace = true
+owo-colors = "4"

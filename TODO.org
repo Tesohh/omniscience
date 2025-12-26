@@ -1,0 +1,38 @@
+ALIASES FOR DIRECTORIES...
+* TODO define a config file "omni.toml" that counts as project root
+keys:
+- project name
+- directory aliases
+- (user) nodes_path = nodes.toml
+- db_path = db.csv (??)
+  (db.csv is the ultimate source of truth for linking.)
+* TODO choose a database format (csv, toml, json...)
+* TODO what do we even want to store in the db?
++ i'm in a directory called ~notes~
++ ~omni new "My Note.typ"~
++ recognize format ~.typ~. go get the template and everything...
++ creates file ~notes/My Note.typ~
++ database gets a new entry with an ~id~ as key:
+  + filename (which may later change!)
+  + aliases (should aliases be here? maybe useful for typsting..)
+    + one of these aliases is the slug: ~my-note~
+  + other metadata such as format, kind of LOCATION (note, directory, heading in other note..)
+
+#+BEGIN_SRC java
+@omni.matrix.operations.addition // to full heading path slug [[omni:matrix/operations/addition]]
+@omni.matrix:addition // to typst label (which acts as alias for heading) OR heading slug [[omni:matrix#addition]]
+@omni.matrix // to file [[omni:matrix]]
+@omni.root.linear-algebra.matrix // to file /Linear Algebra/matrix
+@omni.root.linalg.matrix // to file /Linear Algebra/matrix (WITH AN ALIAS DEFINED IN omni.toml)
+@omni.matrix[matrices] // to file with alias [[omni:matrix|matrices]]
+#+END_SRC
+
+think about how files can be linked to:
+- by slug: ~@omni.my-note~ = ask db => my-note is an alias given to "12bfec" => "notes/my-note.typ"
+- by absolute path: ~@omni.linalg.my-note~ = "notes/linalg/my-note"
+- by absolute id: ~@omni.a5ebfe~ = go through db => "notes/my-note"
+
+  WE SHOULD THEN HAVE TWO DB's: A USER MODIFIABLE ONE, AND A DYNAMIC DB BUILT FROM THE USER FACING ONE AND ALL OTHER DATA GATHERED.
+
+-
+* TODO perhaps look into how zettelkasten id's should work.

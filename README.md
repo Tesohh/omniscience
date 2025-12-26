@@ -24,7 +24,7 @@ but why not, you might want to use typst for that.. or org..
 For now, the project will plan to support:
 - Obsidian (markdown with wikilinks)
 - Org (also with roam)
-- Typst
+- Typst (with a little extra care as typst is not "meant" for this purpose.)
 
 More formats may be added in the future.
 

@@ -5,3 +5,5 @@ members = ["cli","lsp","lib"]
 [workspace.dependencies]
 thiserror = "2.0.17"
 miette = { version = "7.6.0", features = ["fancy"] }
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.9.10"
