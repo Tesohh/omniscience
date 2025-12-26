@@ -14,11 +14,24 @@ but why not, you might want to use typst for that.. or org..
 
 **So this project is about**:
 1. Creating a single database of filenames / slugs / id's / aliases etc. for linking
-2. Recognize "namespaced" links in all supported formats (eg. `[[omni:my-note]]` in markdown or `@omni.my-note` in typst)
-3. Recognize format specific links (eg. `[[obs-note]]` in obsidian vaults)
-4. Provide autocomplete and other assistances when creating pages through a language server
-5. "Compile" all files into a single directory, with all links normalized (eg. `@omni.my-note` => `https://example.com/omni/my-note`)
-6. Run these files through an SSG (provided by the user), like Hugo to get a nice "digital garden"
+2. Recognizing "namespaced" links in all supported formats (eg. `[[omni:my-note]]` in markdown or `@omni.my-note` in typst)
+3. Recognizing format specific links (eg. `[[obs-note]]` in obsidian vaults)
+4. Providing autocomplete and other assistances when creating pages through a language server
+5. (Potentially also having a neovim plugin for even more assistance for neovim users)
+6. "Compiling" all files into a single directory, with all links normalized (eg. `@omni.my-note` => `https://example.com/omni/my-note`)
+7. Running these files through an SSG (provided by the user), like Hugo to get a nice "digital garden"
+
+For now, the project will plan to support:
+- Obsidian (markdown with wikilinks)
+- Org (also with roam)
+- Typst
+
+More formats may be added in the future.
+
+The LSP will of course work on any LSP-supported editor, 
+although everything will be made with neovim users (like me) in mind.
+
+More editor specific plugins may come in the (far) future.
 
 ## personal reasons
 i wanted to make this project as i am a hyper-configurer and have tried many different PKM systems,
@@ -26,12 +39,12 @@ and sometimes i want to try new ones (or even formats that don't "have" a pkm ie
 but that would mean migrating all old notes (SOMEHOW), or having disconnected systems.
 
 all of them have their pros and cons:
-- org{-roam}: has the best organization philosophy (hierarchical), but needs disgusting emacs, 
+- **org{-roam}**: has the best organization philosophy (hierarchical), but needs disgusting emacs, 
   which is just another thing i have to configure... I didn't really use the task management feature to be fair.
-- obsidian: very easy to get started with and used it for quite a while. has no full latex support, 
+- **obsidian**: very easy to get started with and used it for quite a while. has no full latex support, 
   and requires a disgusting electron bloated mess of an editor for many advanced features, with bad vim bindings
   (yes i know about `obsidian.nvim`)
-- typst: very versatile and delightful to write math in,  
+- **typst**: very versatile and delightful to write math in,  
   but doesn't have any way to link between pages (or well, not in the "zettelkasten" sense)
 
 so ideally you should be able to use all of them at the same time, together.
