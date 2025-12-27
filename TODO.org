@@ -1,6 +1,11 @@
 ALIASES FOR DIRECTORIES...
 * Tasks
-** TODO Write a function to resolve any kind of link
+** DONE Write a function to resolve any kind of link
+
+** TODO test said function
+CLOSED: [2025-12-27 Sat 18:02]
+** DONE consider using ~Cow~ for ~Id~...
+CLOSED: [2025-12-27 Sat 18:12]
 ** TODO Write a function that can resolve a Typst link using the previous function
 * Thinking
 ** DONE define a config file "omni.toml" that counts as project root

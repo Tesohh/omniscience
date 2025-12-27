@@ -1,17 +1,10 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use miette::Diagnostic;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::{config::Config, node};
-
-// #[derive(Debug, Deserialize, Serialize, PartialEq)]
-// #[serde(rename_all = "snake_case", tag = "type")]
-// pub enum Link {
-//     Resolved(ResolvedLink),
-//     Ghost(GhostLink),
-// }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
@@ -44,7 +37,7 @@ pub enum Location {
     HeadingPath(Vec<String>),
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum FilePart {
     /// Matches one name under any directory recursively.
@@ -103,20 +96,21 @@ pub enum Error {
 }
 
 impl UnresolvedLink {
-    fn resolve(&self, config: &Config, nodes: node::Db) -> Result<Link, Error> {
-        // get the id for from
-        let from_id = nodes.find_abs(&self.from, config)?;
+    /// consumes `self` to try and resolve the link.
+    pub fn resolve(self, config: &Config, nodes: node::Db) -> Result<Link, Error> {
+        let from = nodes.find_abs(&self.from, config)?;
 
-        let to = match nodes.find_from_filepart(&self.file_part, config) {
-            Ok(_) => todo!(),
-            Err(_) => todo!(),
+        let to_target = match nodes.find_from_filepart(&self.file_part, config) {
+            Ok(node) => To::Id(node.id.clone()),
+            Err(node::Error::NameNotFound(_)) => To::Ghost(self.file_part),
+            Err(err) => return Err(err.into()),
         };
 
         Ok(Link {
-            from: from_id.id,
-            to: to,
-            location: todo!(),
-            alias: todo!(),
+            from: from.id.clone(),
+            to: to_target,
+            location: Some(Location::Label("TODO".into())), // TODO:
+            alias: self.alias,
         })
     }
 }
