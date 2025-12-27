@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
+/// Fully resolved link.
 pub struct Link {
     pub from: String,
     pub to: String,

@@ -10,7 +10,8 @@ keys:
 * DONE choose a database format (csv, toml, json...)
 CLOSED: [2025-12-26 Fri 17:10]
 settled on toml
-* TODO what do we even want to store in the db?
+* DONE what do we even want to store in the db?
+CLOSED: [2025-12-27 Sat 03:14]
 + i'm in a directory called ~notes~
 + ~omni new "My Note.typ"~
 + recognize format ~.typ~. go get the template and everything...
@@ -25,8 +26,8 @@ settled on toml
 @omni.matrix:operations.addition // to full heading path slug [[omni:matrix/operations/addition]]
 @omni.matrix:addition // to typst label (which acts as alias for heading) OR heading slug [[omni:matrix#addition]]
 @omni.matrix // to file [[omni:matrix]]
-@omni.root.linear-algebra.matrix // to file /Linear Algebra/matrix
-@omni.root.linalg.matrix // to file /Linear Algebra/matrix (WITH AN ALIAS DEFINED IN omni.toml)
+@omni.linear-algebra.matrix // to file /Linear Algebra/matrix
+@omni.linalg.matrix // to file /Linear Algebra/matrix (WITH AN ALIAS DEFINED IN omni.toml)
 @omni.matrix[matrices] // to file with alias [[omni:matrix|matrices]]
 #+END_SRC
 
@@ -36,7 +37,6 @@ think about how files can be linked to:
 - by absolute id: ~@omni.a5ebfe~ = go through db => "notes/my-note"
 
   WE SHOULD THEN HAVE TWO DB's: A USER MODIFIABLE ONE, AND A DYNAMIC DB BUILT FROM THE USER FACING ONE AND ALL OTHER DATA GATHERED.
-
 * TODO perhaps look into how zettelkasten id's should work.
 * TODO figure out how links are resolved
 eg. Typst links are divided in four parts:
