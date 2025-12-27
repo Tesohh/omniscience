@@ -44,7 +44,7 @@ pub enum Location {
     HeadingPath(Vec<String>),
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum FilePart {
     /// Matches one name under any directory recursively.
@@ -94,48 +94,27 @@ pub struct UnresolvedLink {
 }
 
 #[derive(Error, Debug, Diagnostic)]
-pub enum Error<'a> {
-    #[error("node at {0} is untracked")]
-    #[diagnostic(help("add the file to the node database tracking it with TODO"))]
-    UntrackedNode(&'a Path),
-
-    #[error("duplicate name {0}")]
-    #[diagnostic(help("try specifying a path for your link"))]
-    DuplicateName(&'a str),
+pub enum Error {
+    #[error("{0}")]
+    NodeDbError(#[from] node::Error),
 
     #[error("io error: {0}")]
     IOError(#[from] std::io::Error),
 }
 
 impl UnresolvedLink {
-    fn resolve(&self, config: &Config, nodes: node::Db) -> Result<Link, Error<'_>> {
+    fn resolve(&self, config: &Config, nodes: node::Db) -> Result<Link, Error> {
         // get the id for from
-        let from_id = match nodes
-            .nodes
-            .binary_search_by_key(&self.from.as_path(), |node| node.path.as_path())
-        {
-            Ok(index) => &nodes.nodes[index].id, // WARNING: this should never crash but you know...
-            Err(_) => return Err(Error::UntrackedNode(&self.from)),
-        };
+        let from_id = nodes.find_abs(&self.from, config)?;
 
-        let to_id = match &self.file_part {
-            FilePart::Name(name) => {
-                let found: Vec<&node::Node> = nodes
-                    .nodes
-                    .iter()
-                    .filter(|node| node.names.contains(name))
-                    .collect();
-                if found.len() > 1 {
-                    return Err(Error::DuplicateName(name));
-                } else {
-                }
-            }
-            FilePart::PathAndName(path, name) => todo!(),
+        let to = match nodes.find_from_filepart(&self.file_part, config) {
+            Ok(_) => todo!(),
+            Err(_) => todo!(),
         };
 
         Ok(Link {
-            from: from_id.clone(),
-            to: todo!(),
+            from: from_id.id,
+            to: to,
             location: todo!(),
             alias: todo!(),
         })
@@ -186,25 +165,28 @@ mod tests {
         };
 
         let expect = r#"[[link]]
-type = "resolved"
 from = "id1"
-to = "id2"
 label = "addition"
 alias = "matrix addition"
 
+[link.to]
+id = "id2"
+
 [[link]]
-type = "resolved"
 from = "id1"
-to = "id2"
 heading_path = [
     "operations",
     "addition",
 ]
 alias = "perform an addition"
 
+[link.to]
+id = "id2"
+
 [[link]]
-type = "ghost"
 from = "id1"
+
+[link.to.ghost]
 path_and_name = [
     ["linalg"],
     "matrix",
@@ -219,25 +201,29 @@ path_and_name = [
     fn test_links_db_parsing() {
         let raw = r#"
         [[link]]
-        type = "resolved"
         from = "id1"
-        to = "id2"
         label = "addition"
         alias = "matrix addition"
 
+        [link.to]
+        id = "id2"
+
         [[link]]
-        type = "resolved"
         from = "id1"
-        to = "id1"
         heading_path = [
             "operations",
             "addition",
         ]
         alias = "perform an addition"
 
+        [link.to]
+        id = "id1"
+
         [[link]]
         type = "ghost"
         from = "id1"
+
+        [link.to.ghost]
         name = "vector"
         "#;
 
@@ -263,11 +249,8 @@ path_and_name = [
                 Link {
                     from: "id1".into(),
                     to: To::Ghost(FilePart::Name("vector".into())),
-                    location: Some(Location::HeadingPath(vec![
-                        "operations".into(),
-                        "addition".into(),
-                    ])),
-                    alias: Some("perform an addition".into()),
+                    location: None,
+                    alias: None,
                 },
             ]
         )

@@ -1,6 +1,10 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
+use miette::Diagnostic;
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
+
+use crate::{config::Config, link, node};
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Eq, Clone)]
 pub struct Id(pub String);
@@ -87,9 +91,218 @@ pub struct Db {
     pub nodes: Vec<Node>,
 }
 
+#[derive(Error, Debug, Diagnostic)]
+pub enum Error {
+    #[error("node at {0} is untracked or does not exist")]
+    #[diagnostic(help("add the file to the node database tracking it with TODO"))]
+    UntrackedNode(PathBuf),
+
+    #[error("node with name {0} not found")]
+    NameNotFound(String),
+
+    #[error("duplicate name {0}")]
+    #[diagnostic(help("try specifying a path for your link"))]
+    DuplicateName(String),
+
+    #[error("empty path in FilePart::PathAndName")]
+    EmptyPath,
+}
+
+impl Db {
+    /// Finds the id of a node from a system path
+    pub fn find_abs(&self, path: &Path, _: &Config) -> Result<&'_ Node, Error> {
+        // TODO: consider canonicalizing
+        match self
+            .nodes
+            .binary_search_by_key(&path, |node| node.path.as_path())
+        {
+            Ok(index) => Ok(&self.nodes[index]), // WARNING: this should never crash but you know...
+            Err(_) => Err(Error::UntrackedNode(path.to_path_buf())),
+        }
+    }
+
+    /// Finds the id of a node from a FilePart
+    pub fn find_from_filepart(
+        &self,
+        part: &link::FilePart,
+        config: &Config,
+    ) -> Result<&'_ Node, Error> {
+        match part {
+            link::FilePart::Name(name) => {
+                let found: Vec<&node::Node> = self
+                    .nodes
+                    .iter()
+                    .filter(|node| node.names.contains(name))
+                    .collect();
+                if found.len() > 1 {
+                    Err(Error::DuplicateName(name.clone()))
+                } else if found.is_empty() {
+                    Err(Error::NameNotFound(name.clone()))
+                } else {
+                    Ok(found[0])
+                }
+            }
+            link::FilePart::PathAndName(fake_path, name) => {
+                let path: PathBuf = if !fake_path.is_empty() {
+                    if let Some(target) = config.dir_aliases.get(&fake_path[0]) {
+                        target.components().map(|c| c.as_os_str()).collect()
+                    } else {
+                        fake_path.join("/").into()
+                    }
+                } else {
+                    return Err(Error::EmptyPath);
+                };
+
+                let found: Vec<&node::Node> = self
+                    .nodes
+                    .iter()
+                    .filter(|node| node.names.contains(name))
+                    .filter(|node| node.path.starts_with(&path))
+                    .collect();
+                if found.len() > 1 {
+                    Err(Error::DuplicateName(name.clone()))
+                } else if found.is_empty() {
+                    Err(Error::NameNotFound(name.clone()))
+                } else {
+                    Ok(found[0])
+                }
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
+    use crate::config::Project;
+
     use super::*;
+
+    #[test]
+    fn test_find_by_name() {
+        let db = Db {
+            nodes: vec![
+                Node {
+                    id: "id1".into(),
+                    path: "linear-algebra".into(),
+                    kind: NodeKind::File,
+                    names: vec!["vector".into()],
+                    tags: vec![],
+                },
+                Node {
+                    id: "id2".into(),
+                    path: "programming/rust".into(),
+                    kind: NodeKind::File,
+                    names: vec!["borrow-checker".into(), "borrow".into()],
+                    tags: vec![],
+                },
+            ],
+        };
+
+        let config = Config {
+            project: Project {
+                name: String::from("project"),
+            },
+            dir_aliases: HashMap::from([("linalg".into(), "linear-algebra".into())]),
+        };
+
+        let found = db
+            .find_from_filepart(&link::FilePart::Name("vector".into()), &config)
+            .unwrap();
+        assert_eq!(found.id, "id1".into());
+
+        let found = db
+            .find_from_filepart(&link::FilePart::Name("borrow".into()), &config)
+            .unwrap();
+        assert_eq!(found.id, "id2".into());
+    }
+
+    #[test]
+    fn test_find_by_name_with_path() {
+        let db = Db {
+            nodes: vec![
+                Node {
+                    id: "id1".into(),
+                    path: "linear-algebra".into(),
+                    kind: NodeKind::File,
+                    names: vec!["vector".into()],
+                    tags: vec![],
+                },
+                Node {
+                    id: "id2".into(),
+                    path: "programming/rust".into(),
+                    kind: NodeKind::File,
+                    names: vec!["vector".into()],
+                    tags: vec![],
+                },
+            ],
+        };
+
+        let config = Config {
+            project: Project {
+                name: String::from("project"),
+            },
+            dir_aliases: HashMap::from([("linalg".into(), "linear-algebra".into())]),
+        };
+
+        let found = db
+            .find_from_filepart(
+                &link::FilePart::PathAndName(vec!["linalg".into()], "vector".into()),
+                &config,
+            )
+            .unwrap();
+        assert_eq!(found.id, "id1".into());
+
+        let found = db
+            .find_from_filepart(
+                &link::FilePart::PathAndName(vec!["programming".into()], "vector".into()),
+                &config,
+            )
+            .unwrap();
+        assert_eq!(found.id, "id2".into());
+
+        let found = db
+            .find_from_filepart(
+                &link::FilePart::PathAndName(vec!["programming/rust".into()], "vector".into()),
+                &config,
+            )
+            .unwrap();
+        assert_eq!(found.id, "id2".into());
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_find_by_name_fail() {
+        let db = Db {
+            nodes: vec![
+                Node {
+                    id: "id1".into(),
+                    path: "linear-algebra".into(),
+                    kind: NodeKind::File,
+                    names: vec!["vector".into()],
+                    tags: vec![],
+                },
+                Node {
+                    id: "id2".into(),
+                    path: "programming/rust".into(),
+                    kind: NodeKind::File,
+                    names: vec!["vector".into()],
+                    tags: vec![],
+                },
+            ],
+        };
+
+        let config = Config {
+            project: Project {
+                name: String::from("project"),
+            },
+            dir_aliases: HashMap::new(),
+        };
+
+        db.find_from_filepart(&link::FilePart::Name("vector".into()), &config)
+            .unwrap();
+    }
 
     #[test]
     fn test_user_nodes_db_parsing() {
