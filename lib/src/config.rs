@@ -21,10 +21,6 @@ pub struct Config {
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Project {
     pub name: String,
-    #[serde(default = "default_nodes_path")]
-    pub nodes_path: PathBuf,
-    #[serde(default = "default_build_path")]
-    pub build_path: PathBuf,
 }
 
 #[derive(Error, Debug, Diagnostic)]
@@ -60,14 +56,6 @@ pub fn find_project_root(pwd: impl AsRef<Path>) -> Result<PathBuf, Error> {
     Err(Error::NoProjectRoot)
 }
 
-fn default_nodes_path() -> PathBuf {
-    PathBuf::from("nodes.toml")
-}
-
-fn default_build_path() -> PathBuf {
-    PathBuf::from("build/")
-}
-
 #[cfg(test)]
 mod tests {
     use tempfile::tempdir;
@@ -92,8 +80,6 @@ mod tests {
             Config {
                 project: Project {
                     name: "my_proj".into(),
-                    nodes_path: "other_nodes.toml".into(),
-                    build_path: "target".into(),
                 },
                 dir_aliases: HashMap::from([("linalg".into(), "Linear Algebra".into())])
             }
@@ -113,8 +99,6 @@ mod tests {
             Config {
                 project: Project {
                     name: "my_proj".into(),
-                    nodes_path: default_nodes_path(),
-                    build_path: default_build_path(),
                 },
                 dir_aliases: HashMap::new()
             }
