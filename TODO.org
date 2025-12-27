@@ -78,12 +78,6 @@ kind = "file"
 names = ["matrix", "matrices"]
 
 [node.id4]
-path = "cs/linear-algebra/matrix.typ"
-kind = "heading"
-heading = "operations"
-names = ["matrix-operations"]
-
-[node.id4]
 path = "cs/overview.md"
 kind = "file"
 names = ["overview"]
@@ -119,13 +113,6 @@ Next: ~@omni.cs.discrete-math.proof-by-induction~
 Next: ~@omni-id.id2~
 0. the link is of form ~id~
 1. final resolved link =cs/c/matrix.md=
-   
-Next: ~@omni.matrix-operations:addition~
-0. the link is of form ~name:heading~
-1. find the node in db with name ~matrix-operations~
-2. the node in question is ~cs/linear-algebra/matrix.typ#operations~
-3. now append the ~heading~ /(which keep in mind may or may not exist)/ to the final link
-4. final resolved link =cs/linear-algebra/matrix.typ#operations#addition=.
 
 Next: ~@omni.dima.proofs.induction:other.strong-induction~ \equiv ~[[omni:dima/proofs/induction#other#strong-induction]]~
 0. the link is of form ~path.name:heading_path.heading~
@@ -143,6 +130,13 @@ Next: ~@omni.dima.proofs.induction:other.strong-induction~ \equiv ~[[omni:dima/p
    Pretty much in typst, headings correspond either to labels or a slug-ized version of the real heading.
    OR we could force every heading to have a label...
 5. final resolved link =cs/discrete-math/proofs/proof-by-induction.typ#other#strong-induction=
+   and this is kind of what it would look like internally if it had an alias:
+  #+begin_src toml
+  from = "id3"
+  to = "id2"
+  heading_path = "#other#strong-induction"
+  alias = "prove by strong induction"
+  #+end_src
 
 FINAL STEP:
 all links must be normalized before using in html.
@@ -152,6 +146,11 @@ all links must be normalized before using in html.
 2. url's want a single ~#id~ hash thing. so ~#operations#addition~ becomes ~#addition~
    (KEEP IN MIND: if we have two different headings called addition, the html link will point to the first one it finds.
    no big deal, that's what it does in obsidian too. we could also throw an error in that case.)
+* DONE consider abandoning the id-ization for headings, can complicate things a lot
+CLOSED: [2025-12-26 Fri 21:15]
+We also need to keep in mind how org-roam works. there you can assign an ID any "subtree" 
+but that's something we only need to keep in mind for building the links.toml. 
+which in that case we might ask org-roam itself for it's internal links
 * TODO are we sure that we need the ~heading_path.heading~?
 because in typst we can just use labels for this.
 but it might be useful for other formats, so i guess we should keep it?
