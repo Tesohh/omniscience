@@ -1,5 +1,9 @@
 ALIASES FOR DIRECTORIES...
-* DONE define a config file "omni.toml" that counts as project root
+* Tasks
+** TODO Write a function to resolve any kind of link
+** TODO Write a function that can resolve a Typst link using the previous function
+* Thinking
+** DONE define a config file "omni.toml" that counts as project root
 CLOSED: [2025-12-26 Fri 17:09]
 keys:
 - project name
@@ -7,10 +11,10 @@ keys:
 - (user) nodes_path = nodes.toml
 - db_path = db.csv (??)
   (db.csv is the ultimate source of truth for linking.)
-* DONE choose a database format (csv, toml, json...)
+    * DONE choose a database format (csv, toml, json...)
 CLOSED: [2025-12-26 Fri 17:10]
 settled on toml
-* DONE what do we even want to store in the db?
+** DONE what do we even want to store in the db?
 CLOSED: [2025-12-27 Sat 03:14]
 + i'm in a directory called ~notes~
 + ~omni new "My Note.typ"~
@@ -21,7 +25,7 @@ CLOSED: [2025-12-27 Sat 03:14]
   + aliases (should aliases be here? maybe useful for typsting..)
     + one of these aliases is the slug: ~my-note~
   + other metadata such as format, kind of LOCATION (note, directory, heading in other note..)
-
+    
 #+BEGIN_SRC typst
 @omni.matrix:operations.addition // to full heading path slug [[omni:matrix/operations/addition]]
 @omni.matrix:addition // to typst label (which acts as alias for heading) OR heading slug [[omni:matrix#addition]]
@@ -35,10 +39,25 @@ think about how files can be linked to:
 - by slug: ~@omni.my-note~ = ask db => my-note is an alias given to "12bfec" => "notes/my-note.typ"
 - by absolute path: ~@omni.linalg.my-note~ = "notes/linalg/my-note"
 - by absolute id: ~@omni.a5ebfe~ = go through db => "notes/my-note"
-
+  
   WE SHOULD THEN HAVE TWO DB's: A USER MODIFIABLE ONE, AND A DYNAMIC DB BUILT FROM THE USER FACING ONE AND ALL OTHER DATA GATHERED.
-* TODO perhaps look into how zettelkasten id's should work.
-* TODO figure out how links are resolved
+** DONE perhaps look into how zettelkasten id's should work.
+CLOSED: [2025-12-27 Sat 14:21]
+each file (node) has it's own ID. the file might move, but it's ID remains the same.
+i personally don't like links with ID's as it makes the file hard to read.
+but it might be supported as a "link style" setting for the lsp, where you type the text for a link, 
+and it then fills in the id with an alias.
+
+Think about it: when someone renames (~mv~) a file, i have two problems:
+that file becomes "untracked", as it is no longer present within ~nodes.toml~.
+The LSP client might inform us when we move a file. (by the way snacks.rename does that in nvim)
+Then we may also have a mv wrapper in the CLI that manages updating the db and updating links in other files.
+(the wrapper may also use our dir_aliases..)
+like ~omni mv linalg/matrix.typ math/matrix.typ~
+would first of all update ~nodes.toml~, and all links of form ~path.file~ to that node.
+The LSP would do the same thing. Check this out..
+[[https://github.com/folke/snacks.nvim/blob/main/docs/rename.md]]
+** TODO figure out how links are resolved
 eg. Typst links are divided in four parts:
 1. ~@omni~ preamble
 2. ~.<filename>~ | ~.<path>.<filename>~ File
@@ -113,7 +132,7 @@ Next: ~@omni.cs.discrete-math.proof-by-induction~
 Next: ~@omni-id.id2~
 0. the link is of form ~id~
 1. final resolved link =cs/c/matrix.md=
-
+   
 Next: ~@omni.dima.proofs.induction:other.strong-induction~ \equiv ~[[omni:dima/proofs/induction#other#strong-induction]]~
 0. the link is of form ~path.name:heading_path.heading~
 1. check ~Config.dir_aliases~. ~dima~ -> ~"cs/discrete-math"~
@@ -131,12 +150,12 @@ Next: ~@omni.dima.proofs.induction:other.strong-induction~ \equiv ~[[omni:dima/p
    OR we could force every heading to have a label...
 5. final resolved link =cs/discrete-math/proofs/proof-by-induction.typ#other#strong-induction=
    and this is kind of what it would look like internally if it had an alias:
-  #+begin_src toml
+   #+begin_src toml
   from = "id3"
   to = "id2"
   heading_path = "#other#strong-induction"
   alias = "prove by strong induction"
-  #+end_src
+   #+end_src
 
 FINAL STEP:
 all links must be normalized before using in html.
@@ -146,12 +165,12 @@ all links must be normalized before using in html.
 2. url's want a single ~#id~ hash thing. so ~#operations#addition~ becomes ~#addition~
    (KEEP IN MIND: if we have two different headings called addition, the html link will point to the first one it finds.
    no big deal, that's what it does in obsidian too. we could also throw an error in that case.)
-* DONE consider abandoning the id-ization for headings, can complicate things a lot
+** DONE consider abandoning the id-ization for headings, can complicate things a lot
 CLOSED: [2025-12-26 Fri 21:15]
 We also need to keep in mind how org-roam works. there you can assign an ID any "subtree" 
 but that's something we only need to keep in mind for building the links.toml. 
 which in that case we might ask org-roam itself for it's internal links
-* TODO are we sure that we need the ~heading_path.heading~?
+** TODO are we sure that we need the ~heading_path.heading~?
 because in typst we can just use labels for this.
 but it might be useful for other formats, so i guess we should keep it?
-* TODO look into WASM for writing a function for resolving links that typst can use too
+** TODO look into WASM for writing a function for resolving links that typst can use too

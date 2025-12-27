@@ -2,6 +2,35 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
+pub struct Id(pub String);
+
+impl Id {
+    pub fn new() -> Self {
+        let date = chrono::Local::now();
+        // YYYYMMDDHHMM
+        Self(date.format("%Y%m%d%H%m").to_string())
+    }
+}
+
+impl Default for Id {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl From<String> for Id {
+    fn from(value: String) -> Self {
+        Id(value)
+    }
+}
+
+impl From<&str> for Id {
+    fn from(value: &str) -> Self {
+        Id(String::from(value))
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct File {
     pub id: String,
@@ -11,7 +40,7 @@ pub struct File {
 impl File {
     pub fn into_node(self, names: Vec<String>, tags: Vec<String>) -> Node {
         Node {
-            id: self.id,
+            id: Id(self.id),
             path: self.path,
             kind: NodeKind::File,
             names,
@@ -40,7 +69,7 @@ pub enum NodeKind {
 /// made by taking a `File` or (in future) other kinds of nodes,
 /// finding names and tags and putting them in here.
 pub struct Node {
-    pub id: String,
+    pub id: Id,
     pub path: PathBuf,
     pub kind: NodeKind,
     #[serde(default)]
@@ -107,18 +136,19 @@ mod tests {
         names = ["proof-by-induction", "induction"]"#;
 
         let db: Db = toml::from_str(raw).unwrap();
+
         assert_eq!(
             db.nodes,
             [
                 Node {
-                    id: "id1".into(),
+                    id: Id("id1".into()),
                     path: "cs/c/matrix.md".into(),
                     kind: NodeKind::File,
                     names: vec!["matrix".into()],
                     tags: vec!["programming".into()]
                 },
                 Node {
-                    id: "id2".into(),
+                    id: Id("id2".into()),
                     path: "cs/discrete-math/proofs/proof-by-induction.typ".into(),
                     kind: NodeKind::File,
                     names: vec!["proof-by-induction".into(), "induction".into()],
