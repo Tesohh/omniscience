@@ -97,7 +97,7 @@ pub enum Error {
 
 impl UnresolvedLink {
     /// consumes `self` to try and resolve the link.
-    pub fn resolve(self, config: &Config, nodes: node::Db) -> Result<Link, Error> {
+    pub fn try_resolve(self, config: &Config, nodes: &node::Db) -> Result<Link, Error> {
         let from = nodes.find_abs(&self.from, config)?;
 
         let to_target = match nodes.find_from_filepart(&self.file_part, config) {
@@ -109,7 +109,7 @@ impl UnresolvedLink {
         Ok(Link {
             from: from.id.clone(),
             to: to_target,
-            location: Some(Location::Label("TODO".into())), // TODO:
+            location: None, // TODO:
             alias: self.alias,
         })
     }
@@ -125,7 +125,106 @@ pub struct Db {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
+    use crate::config::Project;
+
     use super::*;
+
+    fn get_db() -> node::Db {
+        node::Db {
+            nodes: vec![
+                node::Node {
+                    id: "id1".into(),
+                    path: "linear-algebra/vector.typ".into(),
+                    kind: node::NodeKind::File,
+                    names: vec!["vector".into()],
+                    tags: vec![],
+                },
+                node::Node {
+                    id: "id2".into(),
+                    path: "programming/rust/vector.typ".into(),
+                    kind: node::NodeKind::File,
+                    names: vec!["vector".into()],
+                    tags: vec![],
+                },
+            ],
+        }
+    }
+
+    fn get_config() -> Config {
+        Config {
+            project: Project {
+                name: String::from("project"),
+            },
+            dir_aliases: HashMap::from([("linalg".into(), "linear-algebra".into())]),
+        }
+    }
+
+    #[test]
+    fn test_link_resolving() {
+        let db = get_db();
+        let config = get_config();
+
+        let link = UnresolvedLink {
+            from: "linear-algebra/vector.typ".into(),
+            file_part: FilePart::PathAndName(
+                vec!["programming".into(), "rust".into()],
+                "vector".into(),
+            ),
+            heading_part: None,
+            alias: Some("alias".into()),
+        };
+
+        assert_eq!(
+            link.try_resolve(&config, &db).unwrap(),
+            Link {
+                from: "id1".into(),
+                to: To::Id("id2".into()),
+                location: None,
+                alias: Some("alias".into()),
+            },
+        );
+    }
+
+    #[test]
+    fn test_link_resolve_to_ghost() {
+        let db = get_db();
+        let config = get_config();
+
+        let link = UnresolvedLink {
+            from: "linear-algebra/vector.typ".into(),
+            file_part: FilePart::Name("matrix".into()),
+            heading_part: None,
+            alias: None,
+        };
+
+        assert_eq!(
+            link.try_resolve(&config, &db).unwrap(),
+            Link {
+                from: "id1".into(),
+                to: To::Ghost(FilePart::Name("matrix".into())),
+                location: None,
+                alias: None,
+            },
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_link_resolve_fail() {
+        let db = get_db();
+        let config = get_config();
+
+        let link = UnresolvedLink {
+            from: "linear-algebra/matrix.typ".into(),
+            file_part: FilePart::Name("vector".into()),
+            heading_part: None,
+            alias: None,
+        };
+
+        link.try_resolve(&config, &db).unwrap();
+    }
 
     #[test]
     fn test_links_db_serializing() {
