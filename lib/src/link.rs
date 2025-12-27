@@ -6,25 +6,29 @@ use thiserror::Error;
 
 use crate::{config::Config, node};
 
-// #[derive(Debug, Deserialize, Serialize, PartialEq)]
-// #[serde(rename_all = "snake_case", tag = "type")]
-// pub enum Link {
-//     Resolved(ResolvedLink),
-//     Ghost(GhostLink),
-// }
-
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
-#[serde(rename_all = "snake_case")]
-pub enum To {
-    Id(node::Id),
-    Ghost(FilePart),
+#[serde(rename_all = "snake_case", tag = "type")]
+pub enum Link {
+    Resolved(ResolvedLink),
+    Ghost(GhostLink),
 }
 
 /// Fully resolved link.
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
-pub struct Link {
+pub struct ResolvedLink {
     pub from: node::Id,
-    pub to: To,
+    pub to: node::Id,
+    #[serde(flatten)]
+    pub location: Option<Location>,
+    pub alias: Option<String>,
+}
+
+/// Fully resolved link to a file that does not exist yet.
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub struct GhostLink {
+    pub from: node::Id,
+    #[serde(flatten)]
+    pub file_part: FilePart,
     #[serde(flatten)]
     pub location: Option<Location>,
     pub alias: Option<String>,
@@ -133,12 +137,12 @@ impl UnresolvedLink {
             FilePart::PathAndName(path, name) => todo!(),
         };
 
-        Ok(Link {
+        Ok(Link::Resolved(ResolvedLink {
             from: from_id.clone(),
             to: todo!(),
             location: todo!(),
             alias: todo!(),
-        })
+        }))
     }
 }
 
@@ -158,30 +162,27 @@ mod tests {
     fn test_links_db_serializing() {
         let db = Db {
             links: vec![
-                Link {
+                Link::Resolved(ResolvedLink {
                     from: "id1".into(),
-                    to: To::Id("id2".into()),
+                    to: "id2".into(),
                     location: Some(Location::Label("addition".into())),
                     alias: Some("matrix addition".into()),
-                },
-                Link {
+                }),
+                Link::Resolved(ResolvedLink {
                     from: "id1".into(),
-                    to: To::Id("id2".into()),
+                    to: "id2".into(),
                     location: Some(Location::HeadingPath(vec![
                         "operations".into(),
                         "addition".into(),
                     ])),
                     alias: Some("perform an addition".into()),
-                },
-                Link {
+                }),
+                Link::Ghost(GhostLink {
                     from: "id1".into(),
-                    to: To::Ghost(FilePart::PathAndName(
-                        vec!["linalg".into()],
-                        "matrix".into(),
-                    )),
+                    file_part: FilePart::PathAndName(vec!["linalg".into()], "matrix".into()),
                     location: None,
                     alias: None,
-                },
+                }),
             ],
         };
 
@@ -211,7 +212,6 @@ path_and_name = [
 ]
 "#;
 
-        println!("{}", toml::to_string_pretty(&db).unwrap());
         assert_eq!(toml::to_string_pretty(&db).unwrap(), expect)
     }
 
@@ -245,30 +245,27 @@ path_and_name = [
         assert_eq!(
             db.links,
             [
-                Link {
+                Link::Resolved(ResolvedLink {
                     from: "id1".into(),
-                    to: To::Id("id2".into()),
+                    to: "id2".into(),
                     location: Some(Location::Label("addition".into())),
                     alias: Some("matrix addition".into()),
-                },
-                Link {
+                }),
+                Link::Resolved(ResolvedLink {
                     from: "id1".into(),
-                    to: To::Id("id1".into()),
+                    to: "id1".into(),
                     location: Some(Location::HeadingPath(vec![
                         "operations".into(),
                         "addition".into(),
                     ])),
                     alias: Some("perform an addition".into()),
-                },
-                Link {
+                }),
+                Link::Ghost(GhostLink {
                     from: "id1".into(),
-                    to: To::Ghost(FilePart::Name("vector".into())),
-                    location: Some(Location::HeadingPath(vec![
-                        "operations".into(),
-                        "addition".into(),
-                    ])),
-                    alias: Some("perform an addition".into()),
-                },
+                    file_part: FilePart::Name("vector".into()),
+                    location: None,
+                    alias: None,
+                }),
             ]
         )
     }
