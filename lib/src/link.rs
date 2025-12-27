@@ -158,34 +158,36 @@ mod tests {
             ],
         };
 
-        let expect = r#"[[link]]
-from = "id1"
-label = "addition"
-alias = "matrix addition"
+        let expect = indoc::indoc!(
+            r#"[[link]]
+            from = "id1"
+            label = "addition"
+            alias = "matrix addition"
 
-[link.to]
-id = "id2"
+            [link.to]
+            id = "id2"
 
-[[link]]
-from = "id1"
-heading_path = [
-    "operations",
-    "addition",
-]
-alias = "perform an addition"
+            [[link]]
+            from = "id1"
+            heading_path = [
+                "operations",
+                "addition",
+            ]
+            alias = "perform an addition"
 
-[link.to]
-id = "id2"
+            [link.to]
+            id = "id2"
 
-[[link]]
-from = "id1"
+            [[link]]
+            from = "id1"
 
-[link.to.ghost]
-path_and_name = [
-    ["linalg"],
-    "matrix",
-]
-"#;
+            [link.to.ghost]
+            path_and_name = [
+                ["linalg"],
+                "matrix",
+            ]
+            "#
+        );
 
         println!("{}", toml::to_string_pretty(&db).unwrap());
         assert_eq!(toml::to_string_pretty(&db).unwrap(), expect)
