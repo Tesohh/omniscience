@@ -24,10 +24,14 @@ linalg = \"Linear Algebra\"",
 )
 
 
-#str(
-  omni.parse_link(
-    bytes("cs.c.matrix"),
-    bytes("operations.addition"),
-    bytes("my alias"),
-  ),
+#let res = omni.parse_link(
+  bytes("cs.c.matrix"),
+  bytes("operations.addition"),
+  bytes("my alias"),
 )
+
+#str(res)
+
+#let splits = str(res).split(",")
+#link(splits.at(1))[#splits.at(0)]
+

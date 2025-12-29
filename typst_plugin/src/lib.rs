@@ -4,7 +4,7 @@
 
 use wasm_minimal_protocol::{initiate_protocol, wasm_func};
 
-use omni::{config::Config, node};
+use omni::{config::Config, link::FilePart, node};
 
 initiate_protocol!();
 
@@ -41,18 +41,61 @@ fn init(nodes_toml: &[u8], config_toml: &[u8]) -> Vec<u8> {
 ///
 /// returns (comma separated bytes):
 /// `content`: content to display as the link in rendered output
-/// `target`: url to link to
+/// `target`: url to link to or "ghost"
 /// `to`: id of target node or "ghost"
 #[wasm_func]
 fn parse_link(file_part: &[u8], heading_part: &[u8], alias: &[u8]) -> Vec<u8> {
-    let state = STATE.lock().as_ref().unwrap();
+    let lock = STATE.lock();
+    let state = lock.as_ref().unwrap();
 
+    // create a FilePart from the raw dot separated one
     let file_splits: Vec<_> = file_part.split(|c| *c == b'.').collect();
-    let _heading_splits: Vec<_> = heading_part.split(|c| *c == b'.').collect(); // TODO:
+    let file_part = if file_splits.is_empty() {
+        return b"err: empty file part".to_vec();
+    } else if file_splits.len() == 1 {
+        let title = String::from_utf8_lossy(file_splits[0]).to_string();
 
-    // db.find_from_filepart(part, config);
+        FilePart::Name(title)
+    } else {
+        let mut path = vec![];
+        for component in file_splits.iter().take(file_splits.len() - 1) {
+            path.push(String::from_utf8_lossy(component).to_string());
+        }
 
-    "".as_bytes().to_vec()
+        let last = file_splits.last().expect("slice should never be empty");
+        let title = String::from_utf8_lossy(last).to_string();
+        FilePart::PathAndName(path, title)
+    };
+
+    let maybe_node = match state.db.find_from_filepart(&file_part, &state.config) {
+        Ok(node) => Some(node),
+        Err(node::Error::NameNotFound(_)) => None,
+        Err(err) => return format!("err: {}", err).into_bytes(),
+    };
+
+    // TODO: create a HeadingPart from the raw dot separated one
+    // let _heading_splits: Vec<_> = heading_part.split(|c| *c == b'.').collect();
+
+    match maybe_node {
+        Some(node) => {
+            let content = if alias.is_empty() {
+                "PLACEHOLDER GHOST"
+            } else {
+                &String::from_utf8_lossy(alias)
+            };
+
+            format!("{},{},{}", content, node.path.display(), node.id.0).into_bytes()
+        }
+        None => {
+            let content = if alias.is_empty() {
+                "PLACEHOLDER GHOST"
+            } else {
+                &String::from_utf8_lossy(alias)
+            };
+
+            format!("{},ghost,ghost", content).into_bytes()
+        }
+    }
 }
 
 #[wasm_func]
