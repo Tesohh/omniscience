@@ -1,9 +1,9 @@
-use std::collections::HashMap;
+// super fragile.
+// be very careful on what you use here as ANYTHING that relies on IO will result in a wasm trap,
+// and you will spend 8 hours debugging it.
 
-use serde::{Deserialize, Serialize};
 use wasm_minimal_protocol::{initiate_protocol, wasm_func};
 
-// use omni::{config::Config, node};
 use omni::{config::Config, node};
 
 initiate_protocol!();
@@ -30,7 +30,6 @@ fn init(nodes_toml: &[u8], config_toml: &[u8]) -> Vec<u8> {
     };
 
     let mut guard = STATE.lock();
-
     *guard = Some(State { db, config });
 
     b"ok".to_vec()
@@ -44,11 +43,9 @@ fn init(nodes_toml: &[u8], config_toml: &[u8]) -> Vec<u8> {
 /// `content`: content to display as the link in rendered output
 /// `target`: url to link to
 /// `to`: id of target node or "ghost"
-/// TODO: use plugin.transition
 #[wasm_func]
 fn parse_link(file_part: &[u8], heading_part: &[u8], alias: &[u8]) -> Vec<u8> {
-    // let db = db().lock().unwrap().as_ref().unwrap();
-    // let config = config().lock().unwrap().as_ref().unwrap();
+    let state = STATE.lock().as_ref().unwrap();
 
     let file_splits: Vec<_> = file_part.split(|c| *c == b'.').collect();
     let _heading_splits: Vec<_> = heading_part.split(|c| *c == b'.').collect(); // TODO:
