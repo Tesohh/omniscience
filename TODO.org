@@ -1,12 +1,18 @@
-ALIASES FOR DIRECTORIES...
 * Tasks
 ** DONE Write a function to resolve any kind of link
 
-** TODO test said function
+** DONE test said function
 CLOSED: [2025-12-27 Sat 18:02]
 ** DONE consider using ~Cow~ for ~Id~...
 CLOSED: [2025-12-27 Sat 18:12]
-** TODO Write a function that can resolve a Typst link using the previous function
+** TODO add ~new~ command to CLI
+** TODO write a function that can take a raw filepart, headingpart and alias
+** TODO Write a WASM plugin that normalizes Typst links 
+- Typst-compile time:
+  - take the omnilinks and try to get the ~To~ part (id, file title etc.)
+  - add a #metadata for each link
+  - omni cli is gonna later on pick up all metadata from typst query to *gather* the links  
+
 * Thinking
 ** DONE define a config file "omni.toml" that counts as project root
 CLOSED: [2025-12-26 Fri 17:09]
@@ -178,4 +184,17 @@ which in that case we might ask org-roam itself for it's internal links
 ** TODO are we sure that we need the ~heading_path.heading~?
 because in typst we can just use labels for this.
 but it might be useful for other formats, so i guess we should keep it?
-** TODO look into WASM for writing a function for resolving links that typst can use too
+** DONE look into WASM for writing a function for resolving links that typst can use too
+CLOSED: [2025-12-28 Sun 13:49]
+** TODO How to gather links
+- [ ] Typst
+    - [ ] Normalize at typst-compile time AND add links as #metadata (with WASM)
+    - [ ] Gather at omni-build time (with typst query)
+- [ ] Markdown
+    - [ ] Normalize and gather at omni-build time 
+        - [ ] via a markdown-rs extension 
+        - [ ] OR by inspecting the AST with the default wiki links extension 
+        - [ ] OR just use pulldown-cmark
+    - [ ] Keep in mind that we also have to parse regular wiki links and even regular md links.
+- [ ] Org
+    - [ ] Similar to markdown but different libraries.
