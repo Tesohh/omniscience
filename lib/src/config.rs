@@ -1,5 +1,6 @@
 use std::{
     collections::HashMap,
+    hash::{BuildHasherDefault, DefaultHasher},
     path::{Path, PathBuf},
 };
 
@@ -14,8 +15,10 @@ static OMNI_TOML: &str = "omni.toml";
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Config {
     pub project: Project,
+
+    // we need a non-random hasher because wasi doesn't support having a random seed
     #[serde(default)]
-    pub dir_aliases: HashMap<String, PathBuf>,
+    pub dir_aliases: HashMap<String, PathBuf, BuildHasherDefault<DefaultHasher>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -67,8 +70,6 @@ mod tests {
         let raw_toml = r#"
         [project]
         name = "my_proj"
-        nodes_path = "other_nodes.toml" 
-        build_path = "target" 
 
         [dir_aliases]
         linalg = "Linear Algebra"
