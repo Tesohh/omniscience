@@ -6,12 +6,18 @@ CLOSED: [2025-12-27 Sat 18:02]
 ** DONE consider using ~Cow~ for ~Id~...
 CLOSED: [2025-12-27 Sat 18:12]
 ** TODO add ~new~ command to CLI
-** TODO write a function that can take a raw filepart, headingpart and alias
+** DONE write a function that can take a raw filepart, headingpart and alias
+CLOSED: [2025-12-29 Mon 22:58]
+** TODO write a function to normalize a typst link based on the target platform
+- if target == "pdf" then pretty much change the extension from .typ to .pdf and add file://
+- if target == "url" then pretty much remove the extension
 ** TODO Write a WASM plugin that normalizes Typst links 
 - Typst-compile time:
   - take the omnilinks and try to get the ~To~ part (id, file title etc.)
   - add a #metadata for each link
   - omni cli is gonna later on pick up all metadata from typst query to *gather* the links  
+** TODO define a project structure
+** TODO figure out how to use heading part in wasm pklugin
 
 * Thinking
 ** DONE define a config file "omni.toml" that counts as project root
