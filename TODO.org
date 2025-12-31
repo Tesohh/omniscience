@@ -1,22 +1,6 @@
-* Tasks
-** DONE Write a function to resolve any kind of link
-
-** DONE test said function
-CLOSED: [2025-12-27 Sat 18:02]
-** DONE consider using ~Cow~ for ~Id~...
-CLOSED: [2025-12-27 Sat 18:12]
+* CLI
 ** TODO add ~new~ command to CLI
-** DONE write a function that can take a raw filepart, headingpart and alias
-CLOSED: [2025-12-29 Mon 22:58]
-** TODO write a function to normalize a typst link based on the target platform
-- if target == "pdf" then pretty much change the extension from .typ to .pdf and add file://
-- if target == "url" then pretty much remove the extension
-** TODO Write a WASM plugin that normalizes Typst links 
-- Typst-compile time:
-  - take the omnilinks and try to get the ~To~ part (id, file title etc.)
-  - add a #metadata for each link
-  - omni cli is gonna later on pick up all metadata from typst query to *gather* the links  
-** TODO add title to nodes
+
 ** TODO define a project structure
 - project
   - nodes.toml
@@ -35,6 +19,26 @@ CLOSED: [2025-12-29 Mon 22:58]
      - links.toml
      - <all compiled files>
   - notes/
+
+* Tasks
+** DONE Write a function to resolve any kind of link
+
+** DONE test said function
+CLOSED: [2025-12-27 Sat 18:02]
+** DONE consider using ~Cow~ for ~Id~...
+CLOSED: [2025-12-27 Sat 18:12]
+** DONE write a function that can take a raw filepart, headingpart and alias
+CLOSED: [2025-12-29 Mon 22:58]
+** TODO write a function to normalize a typst link based on the target platform
+- if target == "pdf" then pretty much change the extension from .typ to .pdf and add file://
+- if target == "url" then pretty much remove the extension
+** DONE Write a WASM plugin that normalizes Typst links 
+CLOSED: [2025-12-31 Wed 15:49]
+- Typst-compile time:
+  - take the omnilinks and try to get the ~To~ part (id, file title etc.)
+  - add a #metadata for each link
+  - omni cli is gonna later on pick up all metadata from typst query to *gather* the links  
+** TODO add title to nodes
 ** TODO figure out how to use heading part in wasm pklugin
 ** TODO Pdf links?
 pdf is a bit fussy about links.

@@ -42,11 +42,12 @@ pub struct File {
 }
 
 impl File {
-    pub fn into_node(self, names: Vec<String>, tags: Vec<String>) -> Node {
+    pub fn into_node(self, title: String, names: Vec<String>, tags: Vec<String>) -> Node {
         Node {
             id: Id(self.id),
             path: self.path,
             kind: NodeKind::File,
+            title,
             names,
             tags,
         }
@@ -76,6 +77,7 @@ pub struct Node {
     pub id: Id,
     pub path: PathBuf,
     pub kind: NodeKind,
+    pub title: String,
     #[serde(default)]
     pub names: Vec<String>,
     #[serde(default)]
@@ -185,15 +187,17 @@ mod tests {
             nodes: vec![
                 Node {
                     id: "id1".into(),
-                    path: "linear-algebra".into(),
+                    path: "linear-algebra/vector.typ".into(),
                     kind: NodeKind::File,
+                    title: "Vector".into(),
                     names: vec!["vector".into()],
                     tags: vec![],
                 },
                 Node {
                     id: "id2".into(),
-                    path: "programming/rust".into(),
+                    path: "programming/rust/borrowing.typ".into(),
                     kind: NodeKind::File,
+                    title: "Borrowing".into(),
                     names: vec!["borrow-checker".into(), "borrow".into()],
                     tags: vec![],
                 },
@@ -226,6 +230,7 @@ mod tests {
                     id: "id1".into(),
                     path: "linear-algebra".into(),
                     kind: NodeKind::File,
+                    title: "Vector".into(),
                     names: vec!["vector".into()],
                     tags: vec![],
                 },
@@ -233,6 +238,7 @@ mod tests {
                     id: "id2".into(),
                     path: "programming/rust".into(),
                     kind: NodeKind::File,
+                    title: "Vector".into(),
                     names: vec!["vector".into()],
                     tags: vec![],
                 },
@@ -280,6 +286,7 @@ mod tests {
                     id: "id1".into(),
                     path: "linear-algebra".into(),
                     kind: NodeKind::File,
+                    title: "Vector".into(),
                     names: vec!["vector".into()],
                     tags: vec![],
                 },
@@ -287,6 +294,7 @@ mod tests {
                     id: "id2".into(),
                     path: "programming/rust".into(),
                     kind: NodeKind::File,
+                    title: "Vector".into(),
                     names: vec!["vector".into()],
                     tags: vec![],
                 },
@@ -339,6 +347,7 @@ mod tests {
         id = "id1"
         path = "cs/c/matrix.md"
         kind = "file"
+        title = "Matrix"
         names = ["matrix"]
         tags = ["programming"]
 
@@ -346,6 +355,7 @@ mod tests {
         id = "id2"
         path = "cs/discrete-math/proofs/proof-by-induction.typ"
         kind = "file"
+        title = "Proof by induction"
         names = ["proof-by-induction", "induction"]"#;
 
         let db: Db = toml::from_str(raw).unwrap();
@@ -357,6 +367,7 @@ mod tests {
                     id: Id("id1".into()),
                     path: "cs/c/matrix.md".into(),
                     kind: NodeKind::File,
+                    title: "Matrix".into(),
                     names: vec!["matrix".into()],
                     tags: vec!["programming".into()]
                 },
@@ -364,6 +375,7 @@ mod tests {
                     id: Id("id2".into()),
                     path: "cs/discrete-math/proofs/proof-by-induction.typ".into(),
                     kind: NodeKind::File,
+                    title: "Proof by induction".into(),
                     names: vec!["proof-by-induction".into(), "induction".into()],
                     tags: vec![]
                 }

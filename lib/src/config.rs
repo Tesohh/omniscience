@@ -1,11 +1,12 @@
 use std::{
     collections::HashMap,
-    hash::{BuildHasherDefault, DefaultHasher},
     path::{Path, PathBuf},
 };
 
 use miette::Diagnostic;
 use serde::{Deserialize, Serialize};
+#[cfg(target_arch = "wasm32")]
+use std::hash::{BuildHasherDefault, DefaultHasher};
 use thiserror::Error;
 
 static OMNI_TOML: &str = "omni.toml";
@@ -17,8 +18,13 @@ pub struct Config {
     pub project: Project,
 
     // we need a non-random hasher because wasi doesn't support having a random seed
+    #[cfg(target_arch = "wasm32")]
     #[serde(default)]
     pub dir_aliases: HashMap<String, PathBuf, BuildHasherDefault<DefaultHasher>>,
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[serde(default)]
+    pub dir_aliases: HashMap<String, PathBuf>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
