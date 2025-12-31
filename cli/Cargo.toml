@@ -10,4 +10,6 @@ thiserror.workspace = true
 serde.workspace = true
 toml.workspace = true
 owo-colors = "4"
+anstyle = "1.0.10"
+anstyle-owo-colors = "2.0.3"
 tera = "1"

@@ -57,6 +57,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5192cca8006f1fd4f7237516f40fa183bb07f8fbdfedaa0036de5ea9b0b45e78"
 
 [[package]]
+name = "anstyle-owo-colors"
+version = "2.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "695291c4a730c801ccdca9265b3a825d3b1e6f2a2ce25d8c39c0443411292b18"
+dependencies = [
+ "anstyle",
+ "owo-colors",
+]
+
+[[package]]
 name = "anstyle-parse"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -275,6 +285,8 @@ checksum = "a1d728cc89cf3aee9ff92b05e62b19ee65a02b5702cff7d5a377e32c6ae29d8d"
 name = "cli"
 version = "0.1.0"
 dependencies = [
+ "anstyle",
+ "anstyle-owo-colors",
  "clap",
  "miette",
  "owo-colors",
