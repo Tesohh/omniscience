@@ -16,7 +16,25 @@ CLOSED: [2025-12-29 Mon 22:58]
   - take the omnilinks and try to get the ~To~ part (id, file title etc.)
   - add a #metadata for each link
   - omni cli is gonna later on pick up all metadata from typst query to *gather* the links  
+** TODO add title to nodes
 ** TODO define a project structure
+- project
+  - nodes.toml
+  - omni.toml
+  - assets/
+    - lib/
+      - omni.typ
+      - omniscience_typst.wasm
+    - templates/
+      - note.typ
+      - note_md.md
+      - blog.md
+      - todo.org
+  - build/
+     - nodes.toml
+     - links.toml
+     - <all compiled files>
+  - notes/
 ** TODO figure out how to use heading part in wasm pklugin
 ** TODO Pdf links?
 pdf is a bit fussy about links.
