@@ -18,7 +18,18 @@ CLOSED: [2025-12-29 Mon 22:58]
   - omni cli is gonna later on pick up all metadata from typst query to *gather* the links  
 ** TODO define a project structure
 ** TODO figure out how to use heading part in wasm pklugin
+** TODO Pdf links?
+pdf is a bit fussy about links.
+while in html we can just use a / and it will be a "relative" link, 
+in PDF we (theoretically) need a full URL.
+AND it looks like firefox doesn't even like ~file://~ urls.
+we could solve this by:
+- force users to have a omni_machine.toml file with machine specific settings (to be gitignored)
+- the file contains the prepend URL for all links.
+- each node has a SINGLE url associated with it.
+- with ~?format=pdf~ we can see a PDF embedded inside the website for easy navigation.
 
+it's a bit of a dirty solution but ay that's what you have to do
 * Thinking
 ** DONE define a config file "omni.toml" that counts as project root
 CLOSED: [2025-12-26 Fri 17:09]

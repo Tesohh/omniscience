@@ -48,6 +48,14 @@ fn parse_link(file_part: &[u8], heading_part: &[u8], alias: &[u8]) -> Vec<u8> {
     let lock = STATE.lock();
     let state = lock.as_ref().unwrap();
 
+    // return (toml::to_string_pretty(&state.config)
+    //     .unwrap_or("NOTHING".to_string())
+    //     .to_string()
+    //     + ",ghost,ghost")
+    //     .into_bytes();
+    //
+    // return format!("{},ghost,ghost", String::from_utf8_lossy(file_part)).into_bytes();
+
     // create a FilePart from the raw dot separated one
     let file_splits: Vec<_> = file_part.split(|c| *c == b'.').collect();
     let file_part = if file_splits.is_empty() {
@@ -79,7 +87,7 @@ fn parse_link(file_part: &[u8], heading_part: &[u8], alias: &[u8]) -> Vec<u8> {
     match maybe_node {
         Some(node) => {
             let content = if alias.is_empty() {
-                "PLACEHOLDER GHOST"
+                "PLACEHOLDER..."
             } else {
                 &String::from_utf8_lossy(alias)
             };

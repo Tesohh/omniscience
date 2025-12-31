@@ -1,37 +1,15 @@
-#let omni = plugin("../../target/wasm32-wasip1/release/omniscience_typst.wasm")
+#import "omni.typ": omni
+#show: omni.with(title: "")
+#set heading(numbering: "1.")
 
-#let nodes_toml = bytes(
-  "[[node]]
-id = \"id1\"
-path = \"cs/c/matrix.md\"
-kind = \"file\"
-names = [\"matrix\"]
-tags = [\"programming\"]",
-)
+= Kabashi <Style>
 
-#let config_toml = bytes(
-  "[project]
-name = \"my_proj\"
+@omni.cs.c.matrix
 
-[dir_aliases]
-linalg = \"Linear Algebra\"",
-)
+@omni.cs.linalg.matrix
 
-#let omni = plugin.transition(
-  omni.init,
-  nodes_toml,
-  config_toml,
-)
+@omni.style
 
+@Style
 
-#let res = omni.parse_link(
-  bytes("cs.c.matrix"),
-  bytes("operations.addition"),
-  bytes("my alias"),
-)
-
-#str(res)
-
-#let splits = str(res).split(",")
-#link(splits.at(1))[#splits.at(0)]
-
+asdads

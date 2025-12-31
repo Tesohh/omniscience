@@ -93,14 +93,14 @@ pub struct Db {
 
 #[derive(Error, Debug, Diagnostic)]
 pub enum Error {
-    #[error("node at {0} is untracked or does not exist")]
+    #[error("node at `{0}` is untracked or does not exist")]
     #[diagnostic(help("add the file to the node database tracking it with TODO"))]
     UntrackedNode(PathBuf),
 
-    #[error("node with name {0} not found")]
+    #[error("node with name `{0}` not found")]
     NameNotFound(String),
 
-    #[error("duplicate name {0}")]
+    #[error("duplicate name `{0}`")]
     #[diagnostic(help("try specifying a path for your link"))]
     DuplicateName(String),
 
