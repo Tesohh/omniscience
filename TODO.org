@@ -3,28 +3,28 @@
 ** DONE define a project structure
 CLOSED: [2026-01-02 Fri 01:49]
 - project
+  - nodes.toml
+  - omni.toml
+  - resources/
+    - typst/
+        - lib/
+            - omni.typ <typst module>
+            - omniscience_typst.wasm <typst plugin>
+        - templates/ <typst templates>
+            - note.typ
+    - templates/ <omni templates>
+        - note.typ // we also might use tera to pass user arbitrary arguments to templates. like "omni new note --title mytitle"
+        - note_md.md
+        - blog.md
+        - todo.org
+  - build/
     - nodes.toml
-    - omni.toml
-    - resources/
-        - typst/
-            - lib/
-                - omni.typ <typst module>
-                - omniscience_typst.wasm <typst plugin>
-            - templates/ <typst templates>
-                - note.typ
-        - templates/ <omni templates>
-            - note.typ // we also might use tera to pass user arbitrary arguments to templates. like "omni new note --title mytitle"
-            - note_md.md
-            - blog.md
-            - todo.org
-    - build/
-        - nodes.toml
-        - links.toml
-        - <all compiled files>
-    - src/
-        - <all users content>
-    - assets/
-        - <users static assets>
+    - links.toml
+    - <all compiled files>
+  - src/
+    - <all users content>
+  - assets/
+    - <users static assets>
 * Tasks
 ** DONE Write a function to resolve any kind of link
 ** DONE test said function
@@ -56,6 +56,12 @@ we could solve this by:
 - with ~?format=pdf~ we can see a PDF embedded inside the website for easy navigation.
 
 it's a bit of a dirty solution but ay that's what you have to do
+** INFO a way to "smuggle" outside data into typst... might be useful eg. for making sure a typst file knows what it is
+The sys.inputs dictionary, which makes external inputs available to the project. 
+An input specified in the command line as --input key=value becomes available under sys.inputs.key as "value".
+To include spaces in the value, it may be enclosed with single or double quotes.
+
+MIGHT not play well with tinymist though.
 * Thinking
 ** DONE define a config file "omni.toml" that counts as project root
 CLOSED: [2025-12-26 Fri 17:09]
