@@ -69,20 +69,6 @@ pub fn init(cmd: InitCommand) -> miette::Result<(), Error> {
         typst_note_template,
     )?;
 
-    std::fs::create_dir(path.join("src/resources"))?;
-
-    #[cfg(unix)]
-    std::os::unix::fs::symlink(
-        path.join("resources/typst"),
-        path.join("src/resources/typst"),
-    )?;
-
-    #[cfg(windows)]
-    std::os::windows::fs::symlink_dir(
-        path.join("resources/typst"),
-        path.join("src/resources/typst"),
-    )?;
-
     if let Some(path) = &cmd.path {
         pretty::msg(
             "init",
@@ -113,7 +99,6 @@ pub fn init(cmd: InitCommand) -> miette::Result<(), Error> {
             - links.toml
             - <all compiled files>
         - src/
-            - typst/ <symlink to ../resources/typst>
             - <all users content>
         - assets/
             - <users static assets>
@@ -130,9 +115,9 @@ pub fn init(cmd: InitCommand) -> miette::Result<(), Error> {
     {} contains your compiled content (should not be touched)
 
     {} contains your content 
-    {} is a symlink for {}
 
-    {} contains typst-specific resources (of which {} should not be touched)
+    {} contains typst-specific resources
+    {} contains typst-specific libraries and plugins (which shan't be touched)
     {} contains your custom templates
         "#,
             "`omni.toml`".yellow(),
@@ -140,10 +125,8 @@ pub fn init(cmd: InitCommand) -> miette::Result<(), Error> {
             "`assets`".yellow(),
             "`build`".yellow(),
             "`src`".yellow(),
-            "`src/resources/typst`".yellow(),
             "`resources/typst`".yellow(),
-            "`resources/typst`".yellow(),
-            "`lib`".yellow(),
+            "`resources/typst/lib`".yellow(),
             "`resources/templates`".yellow(),
         )
         .trim(),

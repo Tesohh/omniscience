@@ -1,6 +1,4 @@
-#let wasm = plugin("../../target/wasm32-wasip1/release/omniscience_typst.wasm")
-
-
+#let wasm = plugin("/target/wasm32-wasip1/release/omniscience_typst.wasm")
 
 #let ghost-link(body) = { text[#body] }
 

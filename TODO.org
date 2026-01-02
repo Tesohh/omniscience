@@ -22,7 +22,6 @@ CLOSED: [2026-01-02 Fri 01:49]
         - links.toml
         - <all compiled files>
     - src/
-        - typst/ <symlink to ../resources/typst>
         - <all users content>
     - assets/
         - <users static assets>
