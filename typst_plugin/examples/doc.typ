@@ -1,5 +1,5 @@
 #import "omni.typ": omni
-#show: omni.with(title: "")
+#show: omni.with(title: "ioajiosd")
 #set heading(numbering: "1.")
 
 = Kabashi <Style>
@@ -11,5 +11,7 @@
 @omni.style
 
 @Style
+
+@omni.cs.linalg.matrix
 
 asdads

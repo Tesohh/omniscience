@@ -39,6 +39,8 @@ linalg = \"Linear Algebra\"",
     config_toml,
   )
 
+  assert.ne(title, "", message: "empty title. please provide a title.")
+
   show ref: it => {
     if not str(it.target).starts-with("omni.") {
       return it
@@ -59,9 +61,7 @@ linalg = \"Linear Algebra\"",
       bytes(heading_part),
       bytes(alias),
     ))
-    if res.starts-with("err: ") {
-      panic(res.replace("err: ", "omni: "))
-    }
+    assert(not res.starts-with("err: "), message: res.replace("err: ", "omni: "))
 
     let splits = str(res).split(",")
     let node = (
