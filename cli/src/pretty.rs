@@ -33,3 +33,12 @@ pub fn msg(title: impl Display, msg: impl Display) {
         println!("{} {}", title, msg);
     }
 }
+
+pub fn debug(msg: impl Display) {
+    #[cfg(debug_assertions)]
+    if std::io::stdout().is_terminal() {
+        println!("{} {}", "debug".magenta().bold(), msg);
+    } else {
+        println!("info {}", msg);
+    }
+}
