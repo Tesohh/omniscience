@@ -1,28 +1,33 @@
 * CLI
 ** TODO add ~new~ command to CLI
-
-** TODO define a project structure
+** DONE define a project structure
+CLOSED: [2026-01-02 Fri 01:49]
 - project
-  - nodes.toml
-  - omni.toml
-  - assets/
-    - lib/
-      - omni.typ
-      - omniscience_typst.wasm
-    - templates/
-      - note.typ
-      - note_md.md
-      - blog.md
-      - todo.org
-  - build/
-     - nodes.toml
-     - links.toml
-     - <all compiled files>
-  - notes/
-
+    - nodes.toml
+    - omni.toml
+    - resources/
+        - typst/
+            - lib/
+                - omni.typ <typst module>
+                - omniscience_typst.wasm <typst plugin>
+            - templates/ <typst templates>
+                - note.typ
+        - templates/ <omni templates>
+            - note.typ // we also might use tera to pass user arbitrary arguments to templates. like "omni new note --title mytitle"
+            - note_md.md
+            - blog.md
+            - todo.org
+    - build/
+        - nodes.toml
+        - links.toml
+        - <all compiled files>
+    - src/
+        - typst/ <symlink to ../resources/typst>
+        - <all users content>
+    - assets/
+        - <users static assets>
 * Tasks
 ** DONE Write a function to resolve any kind of link
-
 ** DONE test said function
 CLOSED: [2025-12-27 Sat 18:02]
 ** DONE consider using ~Cow~ for ~Id~...

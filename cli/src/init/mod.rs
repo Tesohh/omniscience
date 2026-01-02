@@ -22,7 +22,7 @@ pub fn init(cmd: InitCommand) -> miette::Result<(), Error> {
         None => &PathBuf::from(&cmd.name),
     };
 
-    match std::fs::create_dir(&path) {
+    match std::fs::create_dir(path) {
         Ok(v) => Ok(v),
         Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
             Err(Error::DirAlreadyExists(path.clone()))
