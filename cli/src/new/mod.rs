@@ -1,6 +1,6 @@
 use omni::config::Config;
 
-use crate::{args::NewCommand, pretty};
+use crate::args::NewCommand;
 
 #[derive(thiserror::Error, miette::Diagnostic, Debug)]
 pub enum Error {
