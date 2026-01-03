@@ -45,20 +45,11 @@ pub enum Error {
 
 /// returns the parent directory that contains omni.toml, if it's found, otherwise `Error::NoProjectRoot`
 pub fn find_project_root(pwd: impl AsRef<Path>) -> Result<PathBuf, Error> {
-    let mut current = pwd.as_ref().canonicalize()?;
-    if current.is_file() {
-        return Err(Error::PwdIsAFile);
-    }
+    let current = pwd.as_ref().canonicalize()?;
 
-    loop {
-        let target = current.join(OMNI_TOML);
-        if target.exists() {
-            return Ok(current);
-        }
-
-        match current.parent() {
-            Some(parent) if parent != Path::new("") => current = parent.to_path_buf(),
-            _ => break,
+    for ancestor in current.ancestors() {
+        if ancestor.join(OMNI_TOML).exists() {
+            return Ok(ancestor.to_path_buf());
         }
     }
 
