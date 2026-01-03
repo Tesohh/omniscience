@@ -147,7 +147,7 @@ impl Db {
             link::FilePart::PathAndName(fake_path, name) => {
                 let path: PathBuf = if !fake_path.is_empty() {
                     if let Some(target) = config.dir_aliases.get(&fake_path[0]) {
-                        target.components().map(|c| c.as_os_str()).collect()
+                        target.components().map(|c| c.as_os_str()).collect() // TODO: replace with OmniPath
                     } else {
                         fake_path.join("/").into()
                     }

@@ -27,53 +27,6 @@ pub struct Config {
     pub dir_aliases: HashMap<String, PathBuf>,
 }
 
-// #[derive(thiserror::Error, miette::Diagnostic, Debug)]
-// pub enum OmniPathError {
-//     #[error("path is empty")]
-//     PathEmpty,
-//     #[error("invalid path")]
-//     #[diagnostic(help(
-//         "path must be a omni style path (starts from src, can have aliases, no file extension eg. `linalg/matrix`)"
-//     ))]
-//     InvalidPath,
-//     #[error("path contains invalid unicode")]
-//     InvalidUnicode,
-// }
-//
-// impl Config {
-//     pub fn parse_omni_path(&self, path: impl AsRef<Path>) -> Result<PathBuf, OmniPathError> {
-//         let mut path_components = path.as_ref().components();
-//         let mut target = PathBuf::new();
-//         let mut first = path_components.next().ok_or(OmniPathError::PathEmpty)?;
-//
-//         // TODO: use a custom OmniPathType similar to FilePart
-//
-//         if let Component::Normal(str) = first
-//             && str == "src"
-//         {
-//             first = path_components.next().ok_or(OmniPathError::PathEmpty)?;
-//         } else {
-//             target.push("src");
-//         }
-//
-//         // parse potential alias
-//         if let Component::Normal(first) = first {
-//             let first = first.to_str().ok_or(OmniPathError::InvalidUnicode)?;
-//             match self.dir_aliases.get(first) {
-//                 Some(first) => target.push(first),
-//                 None => target.push(first),
-//             };
-//         };
-//
-//         // add all other components
-//         for component in path_components {
-//             target.push(component);
-//         }
-//
-//         Ok(target)
-//     }
-// }
-
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Project {
     pub name: String,
