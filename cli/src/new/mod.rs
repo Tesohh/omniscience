@@ -1,6 +1,4 @@
-use std::path::{self, Component, Path, PathBuf};
-
-use omni::config::{Config, OmniPathError};
+use omni::config::Config;
 
 use crate::{args::NewCommand, pretty};
 
@@ -12,11 +10,27 @@ pub enum Error {
     // #[error("io error: {0}")]
     // IoError(#[from] std::io::Error),
     //
-    #[error("omni path error:")]
-    OmniPathError(#[from] OmniPathError),
 }
 
+// TODO: need preoject root
 pub fn new(config: &Config, cmd: NewCommand) -> miette::Result<(), Error> {
-    let target = config.parse_omni_path(cmd.path)?;
+    // get the target:
+    // if cmd.raw ==> target = cmd.path
+    // else ==> target = OmniPath(cmd.path).unalias().pathize()
+
+    // if cmd.raw and target.parent() is not a subdir of project_root ==> ERROR
+
+    // if cmd.raw and target.parent() does not exist ==> ERROR
+    // else if !cmd.raw mkdirall if needed
+
+    // get the template
+    // template not found ==> ERROR
+
+    // create the file
+
+    // apply template
+
+    // track file
+
     Ok(())
 }

@@ -34,8 +34,10 @@ pub struct InitCommand {
 pub struct NewCommand {
     /// basename of a template in `resources/templates`
     pub template: String,
-    /// omni-style path to the new file.
+    /// omni-style path to the new file, or regular path if `--raw` is set.
     pub path: PathBuf,
+    #[arg(long)]
+    pub raw: bool,
 }
 
 pub const CLAP_STYLING: clap::builder::styling::Styles = clap::builder::styling::Styles::styled()
