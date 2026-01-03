@@ -44,7 +44,7 @@ fn init(nodes_toml: &[u8], config_toml: &[u8]) -> Vec<u8> {
 /// `target`: url to link to or "ghost"
 /// `to`: id of target node or "ghost"
 #[wasm_func]
-fn parse_link(file_part: &[u8], heading_part: &[u8], alias: &[u8]) -> Vec<u8> {
+fn parse_link(file_part: &[u8], _heading_part: &[u8], alias: &[u8]) -> Vec<u8> {
     let lock = STATE.lock();
     let state = lock.as_ref().unwrap();
 
