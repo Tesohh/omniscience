@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use miette::Diagnostic;
 use thiserror::Error;
 
@@ -17,6 +19,25 @@ pub enum Error {
     EmptyPath,
     #[error("omni.toml contains an empty dir_alias")]
     EmptyPathInConfig,
+    #[error("omni path must be unaliased before pathizing it.")]
+    #[diagnostic(help("this should never happen, report it to the developer"))]
+    PathizeNotUnaliased,
+}
+
+impl TryInto<PathBuf> for OmniPath {
+    type Error = Error;
+
+    /// tries to convert an OmniPath into a PathBuf.
+    /// fails if the OmniPath is not unaliased.
+    ///
+    /// you might need to add the project root and set an extension later.
+    fn try_into(self) -> Result<PathBuf, Self::Error> {
+        if !self.unaliased {
+            return Err(Self::Error::PathizeNotUnaliased);
+        }
+
+        Ok(PathBuf::from(self.path.join("/")).join(self.name))
+    }
 }
 
 impl OmniPath {
@@ -115,5 +136,36 @@ mod tests {
             op.clone().unalias(&config).unwrap().path,
             op.unalias(&config).unwrap().unalias(&config).unwrap().path,
         );
+    }
+
+    #[test]
+    fn test_tryinto() {
+        let config = Config {
+            project: Project {
+                name: "proj".into(),
+            },
+            dir_aliases: HashMap::from([("linalg".into(), "cs/linear-algebra".into())]),
+        };
+
+        let op = OmniPath::new(
+            vec!["linalg".into(), "spectral-analysis".into()],
+            "determinant".into(),
+        );
+
+        assert_eq!(
+            std::convert::TryInto::<PathBuf>::try_into(op.clone().unalias(&config).unwrap())
+                .unwrap(),
+            PathBuf::from("cs/linear-algebra/spectral-analysis/determinant")
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_tryinto_fail() {
+        std::convert::TryInto::<PathBuf>::try_into(OmniPath::new(
+            vec!["some".into()],
+            "path".into(),
+        ))
+        .unwrap();
     }
 }
