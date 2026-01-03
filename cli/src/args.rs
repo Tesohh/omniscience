@@ -34,11 +34,7 @@ pub struct InitCommand {
 pub struct NewCommand {
     /// basename of a template in `resources/templates`
     pub template: String,
-    /// location of the new file.
-    #[arg(
-        long_help = "if it starts with `src`, it is treated as a regular os path, and extension must be added (eg. src/linear-algebra/matrix.typ)
-if it doesn't, dir aliases will be considered, and extension is not needed and is inferred from template (eg. linalg/matrix)"
-    )]
+    /// omni-style path to the new file.
     pub path: PathBuf,
 }
 
