@@ -45,14 +45,15 @@ pub enum FilePart {
     /// Matches one name under some directory path.
     ///
     /// eg.
+    /// ```txt
     /// c/
     ///   dsa/
     ///     matrix.typ
     ///
     /// linalg/
     ///   matrix.typ
-    ///
-    /// (["c"], "matrix.typ") would match the first matrix.typ.
+    ///```
+    /// (`["c"]`, `"matrix.typ"`) would match the first matrix.typ.
     /// WARNING: this may contain aliases that need to be resolved first.
     PathAndName(Vec<String>, String),
 }
