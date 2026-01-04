@@ -4,9 +4,11 @@
 CLOSED: [2026-01-04 Sun 00:43]
 ** DONE give the project root to commands
 CLOSED: [2026-01-04 Sun 01:04]
-** TODO consider using ~camino~ for Utf8Paths
+** DONE consider using ~camino~ for Utf8Paths
+CLOSED: [2026-01-04 Sun 01:59]
 ** TODO add ~new~ command to CLI
-** TODO add ~slug~ package
+** DONE add ~slug~ package
+CLOSED: [2026-01-04 Sun 01:59]
 ** DONE define a project structure
 CLOSED: [2026-01-02 Fri 01:49]
 - project
