@@ -2,7 +2,7 @@ use crate::{args::TrackCommand, pretty};
 use camino::{Utf8Path, Utf8PathBuf};
 use omni::{
     config::Config,
-    node::{self, Id, UserDb},
+    node::{self, UserDb},
     omni_path::{self},
 };
 
@@ -117,7 +117,7 @@ pub fn just_track(root: impl AsRef<Utf8Path>, target: impl AsRef<Utf8Path>) -> R
     };
 
     let file_node = node::File {
-        id: node::Id::new(),
+        id: node::Id::new(&db),
         path: target.clone(),
     };
     db.files.push(file_node.clone());

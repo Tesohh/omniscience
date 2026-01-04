@@ -11,16 +11,23 @@ use crate::{config::Config, link, node};
 pub struct Id(pub String);
 
 impl Id {
-    pub fn new() -> Self {
+    /// YYYYMMDDHHMM
+    /// + C = count as n hex digits
+    pub fn new(db: &UserDb) -> Self {
         let date = chrono::Local::now();
-        // YYYYMMDDHHMM
-        Self(date.format("%Y%m%d%H%m").to_string())
-    }
-}
+        let mut id = date.format("%Y%m%d%H%M").to_string();
 
-impl Default for Id {
-    fn default() -> Self {
-        Self::new()
+        let count = db
+            .files
+            .iter()
+            .filter(|file| file.id.0.starts_with(&id))
+            .count();
+
+        if count > 0 {
+            id = format!("{}-{:02x}", id, count)
+        }
+
+        Self(id)
     }
 }
 
