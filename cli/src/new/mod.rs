@@ -3,12 +3,11 @@ use std::io::Write;
 use camino::{Utf8Path, Utf8PathBuf};
 use omni::{
     config::Config,
-    node::{self, UserDb},
     omni_path::{self, OmniPath},
 };
 use tera::Tera;
 
-use crate::{args::NewCommand, pretty};
+use crate::{args::NewCommand, pretty, track};
 
 #[derive(thiserror::Error, miette::Diagnostic, Debug)]
 pub enum Error {
@@ -26,6 +25,9 @@ pub enum Error {
 
     #[error("toml serialization error")]
     TomlSerializeError(#[from] toml::ser::Error),
+
+    #[error("track error")]
+    TrackError(#[from] track::Error),
 
     #[error("path given has no parent")]
     #[diagnostic(help("might be root or empty?"))]
@@ -134,18 +136,7 @@ pub fn new(
     file.write_all(new_content.as_bytes())?;
 
     // track file
-    let db_path = root.join("nodes.toml");
-    let db_file = std::fs::read(&db_path)?;
-
-    let mut db: UserDb = toml::from_slice(&db_file)?;
-    let file_node = node::File {
-        id: node::Id::new(),
-        path: target.clone(),
-    };
-    db.files.push(file_node.clone());
-
-    let new_toml = toml::to_string(&db)?;
-    std::fs::write(db_path, new_toml)?;
+    track::just_track(root, target)?;
 
     Ok(())
 }

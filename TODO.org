@@ -9,7 +9,8 @@ CLOSED: [2026-01-04 Sun 00:43]
 CLOSED: [2026-01-04 Sun 01:04]
 ** DONE consider using ~camino~ for Utf8Paths
 CLOSED: [2026-01-04 Sun 01:59]
-** TODO add ~new~ command to CLI
+** DONE add ~new~ command to CLI
+CLOSED: [2026-01-04 Sun 16:02]
 ** DONE check if target in ~new~ is within the notes prefix
 CLOSED: [2026-01-04 Sun 14:00]
 ** DONE add ~slug~ package
@@ -37,8 +38,12 @@ CLOSED: [2026-01-02 Fri 01:49]
     - <all compiled files>
   - assets/
     - <users static assets>
-
 ** TODO make it so that templates are loaded and usable even when not in the rust project's directory. using include_dir or something
+** TODO the new command should perhaps also add it's new node to build/nodes.toml 
+and do a "partial build", to resolve some ghost links that might have existed to that node.
+partial build would also be useful for LSP later on.
+** TODO fix all IDs ending in 01 
+** TODO fix possible edge case where multiple nodes are created at once, adn they all have the same id
 * Tasks
 ** DONE Write a function to resolve any kind of link
 ** DONE test said function
@@ -252,13 +257,14 @@ but it might be useful for other formats, so i guess we should keep it?
 CLOSED: [2025-12-28 Sun 13:49]
 ** TODO How to gather links
 - [ ] Typst
-    - [ ] Normalize at typst-compile time AND add links as #metadata (with WASM)
-    - [ ] Gather at omni-build time (with typst query)
+  - [ ] Normalize at typst-compile time AND add links as #metadata (with WASM)
+  - [ ] Gather at omni-build time (with typst query)
 - [ ] Markdown
-    - [ ] Normalize and gather at omni-build time 
-        - [ ] via a markdown-rs extension 
-        - [ ] OR by inspecting the AST with the default wiki links extension 
-        - [ ] OR just use pulldown-cmark
-    - [ ] Keep in mind that we also have to parse regular wiki links and even regular md links.
+  - [ ] Normalize and gather at omni-build time 
+    - [ ] via a markdown-rs extension 
+    - [ ] OR by inspecting the AST with the default wiki links extension 
+    - [ ] OR just use pulldown-cmark
+  - [ ] Keep in mind that we also have to parse regular wiki links and even regular md links.
 - [ ] Org
-    - [ ] Similar to markdown but different libraries.
+  - [ ] Similar to markdown but different libraries.
+** TODO lsp needs the ghost links for completions too.

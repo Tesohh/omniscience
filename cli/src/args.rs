@@ -19,6 +19,7 @@ pub struct Args {
 pub enum Subcommand {
     Init(InitCommand),
     New(NewCommand),
+    Track(TrackCommand),
 }
 
 #[derive(clap::Parser, Debug)]
@@ -38,6 +39,13 @@ pub struct NewCommand {
     pub path: Utf8PathBuf,
     #[arg(long)]
     pub raw: bool,
+}
+
+#[derive(clap::Parser, Debug)]
+/// Starts tracking an existing file.
+pub struct TrackCommand {
+    /// path to the file you want to track.
+    pub path: Utf8PathBuf,
 }
 
 pub const CLAP_STYLING: clap::builder::styling::Styles = clap::builder::styling::Styles::styled()

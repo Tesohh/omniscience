@@ -3,6 +3,7 @@ pub mod init;
 pub mod new;
 pub mod pretty;
 pub mod tera;
+pub mod track;
 
 use camino::{Utf8Path, Utf8PathBuf};
 use clap::Parser;
@@ -22,6 +23,10 @@ fn main() -> miette::Result<()> {
         args::Subcommand::New(cmd) => {
             let (root, config) = read_config(&cwd)?;
             new::new(&root, &config, cmd)?
+        }
+        args::Subcommand::Track(cmd) => {
+            let (root, config) = read_config(&cwd)?;
+            track::track(&root, &config, cmd)?
         }
     }
     Ok(())
