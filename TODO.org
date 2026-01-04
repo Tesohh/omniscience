@@ -10,7 +10,8 @@ CLOSED: [2026-01-04 Sun 01:04]
 ** DONE consider using ~camino~ for Utf8Paths
 CLOSED: [2026-01-04 Sun 01:59]
 ** TODO add ~new~ command to CLI
-** TODO check if target in ~new~ is within the notes prefix
+** DONE check if target in ~new~ is within the notes prefix
+CLOSED: [2026-01-04 Sun 14:00]
 ** DONE add ~slug~ package
 CLOSED: [2026-01-04 Sun 01:59]
 ** DONE define a project structure
@@ -37,6 +38,7 @@ CLOSED: [2026-01-02 Fri 01:49]
   - assets/
     - <users static assets>
 
+** TODO make it so that templates are loaded and usable even when not in the rust project's directory. using include_dir or something
 * Tasks
 ** DONE Write a function to resolve any kind of link
 ** DONE test said function

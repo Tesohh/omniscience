@@ -11,10 +11,10 @@ pub enum Error {
     // #[error("template error")]
     // TemplateError(#[from] tera::Error),
     //
-    #[error("io error: {0}")]
+    #[error("io error")]
     IoError(#[from] std::io::Error),
 
-    #[error("omni path error: {0}")]
+    #[error("omni path error")]
     OmniPathError(#[from] omni_path::Error),
 
     #[error("path given has no parent")]
@@ -25,7 +25,6 @@ pub enum Error {
     OutsideRoot,
 }
 
-// TODO: need preoject root
 pub fn new(
     root: impl AsRef<Utf8Path>,
     config: &Config,
@@ -35,7 +34,14 @@ pub fn new(
 
     let target: Utf8PathBuf = if cmd.raw {
         let parent = cmd.path.parent().ok_or(Error::NoParent)?.canonicalize()?;
-        if !parent.starts_with(root.canonicalize()?) {
+
+        let src = if let Some(prefix_dir) = &config.project.prefix_dir {
+            root.canonicalize()?.join(prefix_dir)
+        } else {
+            root.canonicalize()?
+        };
+
+        if !parent.starts_with(src) {
             return Err(Error::OutsideRoot);
         }
 
