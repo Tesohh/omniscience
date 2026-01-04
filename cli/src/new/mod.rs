@@ -35,11 +35,10 @@ pub fn new(
     let target: Utf8PathBuf = if cmd.raw {
         let parent = cmd.path.parent().ok_or(Error::NoParent)?.canonicalize()?;
 
-        let src = if let Some(prefix_dir) = &config.project.prefix_dir {
-            root.canonicalize()?.join(prefix_dir)
-        } else {
-            root.canonicalize()?
-        };
+        let mut src = root.canonicalize()?;
+        if let Some(prefix_dir) = &config.project.prefix_dir {
+            src = src.join(prefix_dir)
+        }
 
         if !parent.starts_with(src) {
             return Err(Error::OutsideRoot);

@@ -106,11 +106,11 @@ impl OmniPath {
                 self.path
             }
         } else {
-            return Err(Error::EmptyPath);
+            vec![]
         };
 
         if let Some(prefix_dir) = &config.project.prefix_dir
-            && new_path[0] != *prefix_dir
+            && (new_path.is_empty() || new_path[0] != *prefix_dir)
         {
             // if the prefix is not already there, add it
             new_path.insert(0, prefix_dir.clone());
