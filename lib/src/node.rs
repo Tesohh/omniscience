@@ -34,21 +34,32 @@ impl From<&str> for Id {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
 pub struct File {
-    pub id: String,
+    pub id: Id,
     pub path: Utf8PathBuf,
 }
 
 impl File {
     pub fn into_node(self, title: String, names: Vec<String>, tags: Vec<String>) -> Node {
         Node {
-            id: Id(self.id),
+            id: self.id,
             path: self.path,
             kind: NodeKind::File,
             title,
             names,
             tags,
+        }
+    }
+
+    pub fn into_node_barebones(self) -> Node {
+        Node {
+            id: self.id,
+            path: self.path,
+            kind: NodeKind::File,
+            title: String::from(""),
+            names: vec![],
+            tags: vec![],
         }
     }
 }
@@ -59,6 +70,7 @@ impl File {
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct UserDb {
     #[serde(rename = "file")]
+    #[serde(default)]
     pub files: Vec<File>,
 }
 
