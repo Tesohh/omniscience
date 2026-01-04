@@ -1,5 +1,4 @@
-use std::path::{self, Path, PathBuf};
-
+use camino::{Utf8Path, Utf8PathBuf};
 use miette::Diagnostic;
 use thiserror::Error;
 
@@ -33,28 +32,28 @@ pub enum Error {
     InvalidComponent,
 }
 
-impl TryInto<PathBuf> for OmniPath {
+impl TryInto<Utf8PathBuf> for OmniPath {
     type Error = Error;
 
     /// tries to convert an OmniPath into a PathBuf.
     /// fails if the OmniPath is not unaliased.
     ///
     /// you might need to add the project root and set an extension later.
-    fn try_into(self) -> Result<PathBuf, Self::Error> {
+    fn try_into(self) -> Result<Utf8PathBuf, Self::Error> {
         if !self.unaliased {
             return Err(Self::Error::PathizeNotUnaliased);
         }
 
-        Ok(PathBuf::from(self.path.join("/")).join(self.name))
+        Ok(Utf8PathBuf::from(self.path.join("/")).join(self.name))
     }
 }
 
-impl TryFrom<&Path> for OmniPath {
+impl TryFrom<&Utf8Path> for OmniPath {
     type Error = Error;
 
     /// tries to convert a PathBuf into a OmniPath.
     /// it is not guaranteed that the OmniPath will be valid of course.
-    fn try_from(value: &Path) -> Result<Self, Self::Error> {
+    fn try_from(value: &Utf8Path) -> Result<Self, Self::Error> {
         if value.as_os_str().is_empty() {
             return Err(Error::EmptyPathInConversionFromPath);
         }
@@ -62,7 +61,7 @@ impl TryFrom<&Path> for OmniPath {
         let mut path: Vec<_> = value
             .components()
             .map(|c| match c {
-                path::Component::Normal(os_str) => Ok(os_str.to_string_lossy().to_string()),
+                camino::Utf8Component::Normal(c) => Ok(c.to_string()),
                 _ => Err(Error::InvalidComponent),
             })
             .collect::<Result<Vec<_>, Self::Error>>()?;
@@ -93,14 +92,14 @@ impl OmniPath {
 
         let new_path: Vec<String> = if !self.path.is_empty() {
             if let Some(alias_target) = config.dir_aliases.get(&self.path[0]) {
-                if alias_target.as_os_str().is_empty() {
+                if alias_target.as_str().is_empty() {
                     return Err(Error::EmptyPathInConfig);
                 }
 
                 alias_target
                     .join(self.path[1..].join("/"))
                     .components()
-                    .map(|c| c.as_os_str().to_string_lossy().to_string())
+                    .map(|c| c.to_string())
                     .collect()
             } else {
                 // no alias found. just return the original path
@@ -117,7 +116,7 @@ impl OmniPath {
         })
     }
 
-    pub fn try_from_path(path: impl AsRef<Path>) -> Result<Self, Error> {
+    pub fn try_from_path(path: impl AsRef<Utf8Path>) -> Result<Self, Error> {
         Self::try_from(path.as_ref())
     }
 }
@@ -190,16 +189,16 @@ mod tests {
         );
 
         assert_eq!(
-            std::convert::TryInto::<PathBuf>::try_into(op.clone().unalias(&config).unwrap())
+            std::convert::TryInto::<Utf8PathBuf>::try_into(op.clone().unalias(&config).unwrap())
                 .unwrap(),
-            PathBuf::from("cs/linear-algebra/spectral-analysis/determinant")
+            Utf8PathBuf::from("cs/linear-algebra/spectral-analysis/determinant")
         );
     }
 
     #[test]
     #[should_panic]
     fn test_tryinto_fail() {
-        std::convert::TryInto::<PathBuf>::try_into(OmniPath::new(
+        std::convert::TryInto::<Utf8PathBuf>::try_into(OmniPath::new(
             vec!["some".into()],
             "path".into(),
         ))
@@ -208,7 +207,7 @@ mod tests {
 
     #[test]
     fn test_tryfrom() {
-        let op = OmniPath::try_from(PathBuf::from("linalg/matrix").as_path()).unwrap();
+        let op = OmniPath::try_from(Utf8PathBuf::from("linalg/matrix").as_path()).unwrap();
         assert_eq!(op.path, ["linalg"]);
         assert_eq!(op.name, "matrix");
     }
@@ -216,6 +215,6 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_tryfrom_fail() {
-        OmniPath::try_from(PathBuf::from("../linalg/matrix").as_path()).unwrap();
+        OmniPath::try_from(Utf8PathBuf::from("../linalg/matrix").as_path()).unwrap();
     }
 }

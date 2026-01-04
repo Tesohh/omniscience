@@ -1,8 +1,6 @@
-use std::{
-    collections::HashMap,
-    path::{Path, PathBuf},
-};
+use std::collections::HashMap;
 
+use camino::{Utf8Path, Utf8PathBuf};
 use miette::Diagnostic;
 use serde::{Deserialize, Serialize};
 #[cfg(target_arch = "wasm32")]
@@ -20,11 +18,11 @@ pub struct Config {
     // we need a non-random hasher because wasi doesn't support having a random seed
     #[cfg(target_arch = "wasm32")]
     #[serde(default)]
-    pub dir_aliases: HashMap<String, PathBuf, BuildHasherDefault<DefaultHasher>>,
+    pub dir_aliases: HashMap<String, Utf8PathBuf, BuildHasherDefault<DefaultHasher>>,
 
     #[cfg(not(target_arch = "wasm32"))]
     #[serde(default)]
-    pub dir_aliases: HashMap<String, PathBuf>,
+    pub dir_aliases: HashMap<String, Utf8PathBuf>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -44,8 +42,8 @@ pub enum Error {
 }
 
 /// returns the parent directory that contains omni.toml, if it's found, otherwise `Error::NoProjectRoot`
-pub fn find_project_root(pwd: impl AsRef<Path>) -> Result<PathBuf, Error> {
-    let current = pwd.as_ref().canonicalize()?;
+pub fn find_project_root(pwd: impl AsRef<Utf8Path>) -> Result<Utf8PathBuf, Error> {
+    let current = pwd.as_ref().canonicalize_utf8()?;
 
     for ancestor in current.ancestors() {
         if ancestor.join(OMNI_TOML).exists() {
@@ -105,7 +103,7 @@ mod tests {
 
     #[test]
     fn test_project_root_resolution_fail() {
-        let mut path = tempdir().unwrap().path().to_path_buf();
+        let mut path = Utf8PathBuf::try_from(tempdir().unwrap().path().to_path_buf()).unwrap();
         path.push("notes/linalg/deep/nested");
 
         std::fs::create_dir_all(&path).unwrap();
@@ -119,7 +117,8 @@ mod tests {
 
     #[test]
     fn test_project_root_resolution() {
-        let root = tempdir().unwrap().path().canonicalize().unwrap();
+        let root =
+            Utf8PathBuf::try_from(tempdir().unwrap().path().canonicalize().unwrap()).unwrap();
         let mut path = root.clone();
         path.push("notes/linalg/deep/nested");
 
@@ -132,7 +131,7 @@ mod tests {
     #[test]
     fn test_project_root_resolution_same_path() {
         let temp = tempdir().unwrap(); // needs to be given a binding or else it would be dropped
-        let root = temp.path().canonicalize().unwrap();
+        let root = Utf8PathBuf::try_from(temp.path().canonicalize().unwrap()).unwrap();
         std::fs::File::create(root.join(OMNI_TOML)).unwrap();
         assert_eq!(find_project_root(&root).unwrap(), root);
     }

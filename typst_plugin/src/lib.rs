@@ -92,7 +92,7 @@ fn parse_link(file_part: &[u8], _heading_part: &[u8], alias: &[u8]) -> Vec<u8> {
                 &String::from_utf8_lossy(alias)
             };
 
-            format!("{},{},{}", content, node.path.display(), node.id.0).into_bytes()
+            format!("{},{},{}", content, node.path, node.id.0).into_bytes()
         }
         None => {
             let content = if alias.is_empty() {

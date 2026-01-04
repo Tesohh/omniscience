@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use camino::Utf8PathBuf;
 
 #[derive(clap::Parser, Debug)]
 #[command(
@@ -26,7 +26,7 @@ pub enum Subcommand {
 pub struct InitCommand {
     pub name: String,
     #[arg(long)]
-    pub path: Option<PathBuf>,
+    pub path: Option<Utf8PathBuf>,
 }
 
 #[derive(clap::Parser, Debug)]
@@ -35,7 +35,7 @@ pub struct NewCommand {
     /// basename of a template in `resources/templates`
     pub template: String,
     /// omni-style path to the new file, or regular path if `--raw` is set.
-    pub path: PathBuf,
+    pub path: Utf8PathBuf,
     #[arg(long)]
     pub raw: bool,
 }

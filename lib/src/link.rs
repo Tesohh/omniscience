@@ -1,5 +1,4 @@
-use std::path::PathBuf;
-
+use camino::Utf8PathBuf;
 use miette::Diagnostic;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -81,7 +80,7 @@ pub enum HeadingPart {
 
 /// Generic form of an unresolved link, which is pretty much what we get straight out of the user.
 pub struct UnresolvedLink {
-    pub from: PathBuf,
+    pub from: Utf8PathBuf,
     pub file_part: FilePart,
     pub heading_part: Option<HeadingPart>,
     pub alias: Option<String>,

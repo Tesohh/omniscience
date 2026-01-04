@@ -1,5 +1,4 @@
-use std::path::PathBuf;
-
+use camino::Utf8PathBuf;
 use owo_colors::OwoColorize;
 
 use crate::{args::InitCommand, pretty};
@@ -13,13 +12,13 @@ pub enum Error {
     IoError(#[from] std::io::Error),
 
     #[error("directory `{0}` already exists")]
-    DirAlreadyExists(PathBuf),
+    DirAlreadyExists(Utf8PathBuf),
 }
 
 pub fn init(cmd: InitCommand) -> miette::Result<(), Error> {
     let path = match &cmd.path {
         Some(v) => v,
-        None => &PathBuf::from(&cmd.name),
+        None => &Utf8PathBuf::from(&cmd.name),
     };
 
     match std::fs::create_dir(path) {
@@ -72,7 +71,7 @@ pub fn init(cmd: InitCommand) -> miette::Result<(), Error> {
     if let Some(path) = &cmd.path {
         pretty::msg(
             "init",
-            format!("{} {}", cmd.name, format!("at {}", path.display()).dimmed()),
+            format!("{} {}", cmd.name, format!("at {}", path).dimmed()),
         );
     } else {
         pretty::msg("init", &cmd.name);

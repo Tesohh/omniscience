@@ -1,5 +1,4 @@
-use std::path::{Path, PathBuf};
-
+use camino::{Utf8Path, Utf8PathBuf};
 use miette::Diagnostic;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -38,7 +37,7 @@ impl From<&str> for Id {
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct File {
     pub id: String,
-    pub path: PathBuf,
+    pub path: Utf8PathBuf,
 }
 
 impl File {
@@ -75,7 +74,7 @@ pub enum NodeKind {
 /// finding names and tags and putting them in here.
 pub struct Node {
     pub id: Id,
-    pub path: PathBuf,
+    pub path: Utf8PathBuf,
     pub kind: NodeKind,
     pub title: String,
     #[serde(default)]
@@ -97,7 +96,7 @@ pub struct Db {
 pub enum Error {
     #[error("node at `{0}` is untracked or does not exist")]
     #[diagnostic(help("add the file to the node database tracking it with TODO"))]
-    UntrackedNode(PathBuf),
+    UntrackedNode(Utf8PathBuf),
 
     #[error("node with name `{0}` not found")]
     NameNotFound(String),
@@ -112,7 +111,7 @@ pub enum Error {
 
 impl Db {
     /// Finds the id of a node from a system path
-    pub fn find_abs(&self, path: &Path, _: &Config) -> Result<&'_ Node, Error> {
+    pub fn find_abs(&self, path: &Utf8Path, _: &Config) -> Result<&'_ Node, Error> {
         // TODO: consider canonicalizing
         match self
             .nodes
@@ -145,9 +144,9 @@ impl Db {
                 }
             }
             link::FilePart::PathAndName(fake_path, name) => {
-                let path: PathBuf = if !fake_path.is_empty() {
+                let path: Utf8PathBuf = if !fake_path.is_empty() {
                     if let Some(target) = config.dir_aliases.get(&fake_path[0]) {
-                        target.components().map(|c| c.as_os_str()).collect() // TODO: replace with OmniPath
+                        target.components().collect() // TODO: replace with OmniPath
                     } else {
                         fake_path.join("/").into()
                     }

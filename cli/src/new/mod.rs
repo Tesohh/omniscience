@@ -1,5 +1,4 @@
-use std::path::{Path, PathBuf};
-
+use camino::{Utf8Path, Utf8PathBuf};
 use omni::{
     config::Config,
     omni_path::{self, OmniPath},
@@ -27,10 +26,14 @@ pub enum Error {
 }
 
 // TODO: need preoject root
-pub fn new(root: impl AsRef<Path>, config: &Config, cmd: NewCommand) -> miette::Result<(), Error> {
+pub fn new(
+    root: impl AsRef<Utf8Path>,
+    config: &Config,
+    cmd: NewCommand,
+) -> miette::Result<(), Error> {
     let root = root.as_ref();
 
-    let target: PathBuf = if cmd.raw {
+    let target: Utf8PathBuf = if cmd.raw {
         let parent = cmd.path.parent().ok_or(Error::NoParent)?.canonicalize()?;
         if !parent.starts_with(root.canonicalize()?) {
             return Err(Error::OutsideRoot);

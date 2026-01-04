@@ -2,15 +2,16 @@
 resolver = "3"
 members = ["cli","lsp","lib", "typst_plugin"]
 
-[workspace.dependencies]
-thiserror = "2.0.17"
-miette = { version = "7.6.0", features = ["fancy"] }
-serde = { version = "1.0", features = ["derive"] }
-toml = "0.9.10"
-
 [profile.release.package.omniscience_typst]
 # lto = true          # Enable link-time optimization
 strip = true        # Strip symbols from binary*
 opt-level = 'z'     # Optimize for size
 codegen-units = 1   # Reduce number of codegen units to increase optimizations
 # panic = 'abort'     # Abort on panic
+
+[workspace.dependencies]
+thiserror = "2.0.17"
+miette = { version = "7.6.0", features = ["fancy"] }
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.9.10"
+camino = { version = "1.2.2", features = ["serde1"] }
