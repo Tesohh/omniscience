@@ -116,6 +116,7 @@ pub struct Node {
 /// *this is the ultimate source of truth for nodes.*
 pub struct Db {
     #[serde(rename = "node")]
+    #[serde(default)]
     pub nodes: Vec<Node>,
 }
 

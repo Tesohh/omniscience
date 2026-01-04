@@ -38,7 +38,7 @@ CLOSED: [2026-01-02 Fri 01:49]
     - <all compiled files>
   - assets/
     - <users static assets>
-** TODO make it so that templates are loaded and usable even when not in the rust project's directory. using include_dir or something
+** TODO make it so that init templates are loaded and usable even when not in the rust project's directory. using include_dir or something
 ** TODO the new command should perhaps also add it's new node to build/nodes.toml 
 and do a "partial build", to resolve some ghost links that might have existed to that node.
 partial build would also be useful for LSP later on.

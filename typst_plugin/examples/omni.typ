@@ -11,6 +11,7 @@
   let nodes_toml = bytes(
     "[[node]]
 id = \"id1\"
+title = \"Matrix\"
 path = \"cs/c/matrix.md\"
 kind = \"file\"
 names = [\"matrix\"]
@@ -18,6 +19,7 @@ tags = [\"programming\"]
 
   [[node]]
   id = \"id1\"
+  title = \"Matrix\"
   path = \"cs/linalg/matrix.md\"
   kind = \"file\"
   names = [\"matrix\"]
@@ -33,11 +35,14 @@ name = \"my_proj\"
 linalg = \"Linear Algebra\"",
   )
 
-  let wasm = plugin.transition(
-    wasm.init,
-    nodes_toml,
-    config_toml,
-  )
+  let res = str(wasm.init(nodes_toml, config_toml))
+  assert(not res.starts-with("err: "), message: res.replace("err: ", "omni: "))
+
+  // let wasm = plugin.transition(
+  //   wasm.init,
+  //   nodes_toml,
+  //   config_toml,
+  // )
 
   assert.ne(title, "", message: "empty title. please provide a title.")
 

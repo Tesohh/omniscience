@@ -1,4 +1,4 @@
-#let wasm = plugin("/target/wasm32-wasip1/release/omniscience_typst.wasm") // TODO: replace with something else
+#let wasm = plugin("/resources/typst/lib/omniscience_typst.wasm") // TODO: replace with something else
 
 #let ghost-link(body) = { text[#body] }
 
@@ -8,8 +8,8 @@
   names: (),
   body,
 ) = {
-  let nodes_toml = read("build/nodes.toml", encoding: none)
-  let config_toml = read("config.toml", encoding: none)
+  let nodes_toml = read("/build/nodes.toml", encoding: none)
+  let config_toml = read("/omni.toml", encoding: none)
 
   let wasm = plugin.transition(
     wasm.init,
