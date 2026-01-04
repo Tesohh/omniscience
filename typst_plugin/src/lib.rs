@@ -57,56 +57,56 @@ fn parse_link(file_part: &[u8], _heading_part: &[u8], alias: &[u8]) -> Vec<u8> {
     //     + ",ghost,ghost")
     //     .into_bytes();
 
-    return format!("{},ghost,ghost", String::from_utf8_lossy(file_part)).into_bytes();
+    // return format!("{},ghost,ghost", String::from_utf8_lossy(file_part)).into_bytes();
 
     // create a FilePart from the raw dot separated one
     let file_splits: Vec<_> = file_part.split(|c| *c == b'.').collect();
-    // let file_part = if file_splits.is_empty() {
-    //     return b"err: empty file part".to_vec();
-    // } else if file_splits.len() == 1 {
-    //     let title = String::from_utf8_lossy(file_splits[0]).to_string();
-    //
-    //     FilePart::Name(title)
-    // } else {
-    //     let mut path = vec![];
-    //     for component in file_splits.iter().take(file_splits.len() - 1) {
-    //         path.push(String::from_utf8_lossy(component).to_string());
-    //     }
-    //
-    //     let last = file_splits.last().expect("slice should never be empty");
-    //     let title = String::from_utf8_lossy(last).to_string();
-    //     FilePart::PathAndName(path, title)
-    // };
-    //
-    // let maybe_node = match state.db.find_from_filepart(&file_part, &state.config) {
-    //     Ok(node) => Some(node),
-    //     Err(node::Error::NameNotFound(_)) => None,
-    //     Err(err) => return format!("err: {}", err).into_bytes(),
-    // };
-    //
-    // // TODO: create a HeadingPart from the raw dot separated one
-    // // let _heading_splits: Vec<_> = heading_part.split(|c| *c == b'.').collect();
-    //
-    // match maybe_node {
-    //     Some(node) => {
-    //         let content = if alias.is_empty() {
-    //             "PLACEHOLDER..."
-    //         } else {
-    //             &String::from_utf8_lossy(alias)
-    //         };
-    //
-    //         format!("{},{},{}", content, node.path, node.id.0).into_bytes()
-    //     }
-    //     None => {
-    //         let content = if alias.is_empty() {
-    //             "PLACEHOLDER GHOST"
-    //         } else {
-    //             &String::from_utf8_lossy(alias)
-    //         };
-    //
-    //         format!("{},ghost,ghost", content).into_bytes()
-    //     }
-    // }
+    let file_part = if file_splits.is_empty() {
+        return b"err: empty file part".to_vec();
+    } else if file_splits.len() == 1 {
+        let title = String::from_utf8_lossy(file_splits[0]).to_string();
+
+        FilePart::Name(title)
+    } else {
+        let mut path = vec![];
+        for component in file_splits.iter().take(file_splits.len() - 1) {
+            path.push(String::from_utf8_lossy(component).to_string());
+        }
+
+        let last = file_splits.last().expect("slice should never be empty");
+        let title = String::from_utf8_lossy(last).to_string();
+        FilePart::PathAndName(path, title)
+    };
+
+    let maybe_node = match state.db.find_from_filepart(&file_part, &state.config) {
+        Ok(node) => Some(node),
+        Err(node::Error::NameNotFound(_)) => None,
+        Err(err) => return format!("err: {}", err).into_bytes(),
+    };
+
+    // TODO: create a HeadingPart from the raw dot separated one
+    // let _heading_splits: Vec<_> = heading_part.split(|c| *c == b'.').collect();
+
+    match maybe_node {
+        Some(node) => {
+            let content = if alias.is_empty() {
+                "PLACEHOLDER..."
+            } else {
+                &String::from_utf8_lossy(alias)
+            };
+
+            format!("{},{},{}", content, node.path, node.id.0).into_bytes()
+        }
+        None => {
+            let content = if alias.is_empty() {
+                "PLACEHOLDER GHOST"
+            } else {
+                &String::from_utf8_lossy(alias)
+            };
+
+            format!("{},ghost,ghost", content).into_bytes()
+        }
+    }
 }
 
 #[wasm_func]
