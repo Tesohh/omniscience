@@ -81,6 +81,24 @@ pub fn track(
     just_track(root, target)
 }
 
+pub fn is_already_tracked(db: &UserDb, target: impl AsRef<Utf8Path>) -> Result<bool, Error> {
+    let canonical_target = target.as_ref().canonicalize_utf8()?;
+    Ok(db
+        .files
+        .iter()
+        .filter_map(|f| match f.path.canonicalize_utf8() {
+            Ok(p) => Some(p),
+            Err(err) => {
+                pretty::warning(format!(
+                    "invalid path found in nodes.toml for id {}. error: {}",
+                    f.id, err
+                ));
+                None
+            }
+        })
+        .any(|path| path == canonical_target))
+}
+
 /// core logic of track, without all input validation.
 /// assumes target is a file and exists
 /// only check that it does is checking if the file is already tracked
@@ -94,22 +112,7 @@ pub fn just_track(root: impl AsRef<Utf8Path>, target: impl AsRef<Utf8Path>) -> R
     let mut db: UserDb = toml::from_slice(&db_file)?;
 
     // Check that target it not already tracked
-    let canonical_target = target.canonicalize_utf8()?;
-    if db
-        .files
-        .iter()
-        .filter_map(|f| match f.path.canonicalize_utf8() {
-            Ok(p) => Some(p),
-            Err(err) => {
-                pretty::warning(format!(
-                    "invalid path found in nodes.toml for id {}. error: {}",
-                    f.id, err
-                ));
-                None
-            }
-        })
-        .any(|path| path == canonical_target)
-    {
+    if is_already_tracked(&db, &target)? {
         return Err(Error::AlreadyTracked(target));
     };
 
