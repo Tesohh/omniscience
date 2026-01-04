@@ -158,6 +158,7 @@ mod tests {
         Config {
             project: Project {
                 name: String::from("project"),
+                prefix_dir: None,
             },
             dir_aliases: HashMap::from([("linalg".into(), "linear-algebra".into())]),
         }

@@ -90,7 +90,7 @@ impl OmniPath {
             return Ok(self);
         }
 
-        let new_path: Vec<String> = if !self.path.is_empty() {
+        let mut new_path: Vec<String> = if !self.path.is_empty() {
             if let Some(alias_target) = config.dir_aliases.get(&self.path[0]) {
                 if alias_target.as_str().is_empty() {
                     return Err(Error::EmptyPathInConfig);
@@ -108,6 +108,13 @@ impl OmniPath {
         } else {
             return Err(Error::EmptyPath);
         };
+
+        if let Some(prefix_dir) = &config.project.prefix_dir
+            && new_path[0] != *prefix_dir
+        {
+            // if the prefix is not already there, add it
+            new_path.insert(0, prefix_dir.clone());
+        }
 
         Ok(Self {
             path: new_path,
@@ -134,6 +141,7 @@ mod tests {
         let config = Config {
             project: Project {
                 name: "proj".into(),
+                prefix_dir: None,
             },
             dir_aliases: HashMap::from([("linalg".into(), "cs/linear-algebra".into())]),
         };
@@ -155,10 +163,43 @@ mod tests {
     }
 
     #[test]
+    fn test_unaliasing_with_prefix() {
+        let config = Config {
+            project: Project {
+                name: "proj".into(),
+                prefix_dir: Some("src".into()),
+            },
+            dir_aliases: HashMap::from([("linalg".into(), "cs/linear-algebra".into())]),
+        };
+
+        let op = OmniPath::new(vec!["linalg".into()], "matrix".into());
+        assert_eq!(
+            op.unalias(&config).unwrap().path,
+            ["src", "cs", "linear-algebra"]
+        );
+
+        let op = OmniPath::new(
+            vec!["linalg".into(), "spectral-analysis".into()],
+            "determinant".into(),
+        );
+        assert_eq!(
+            op.unalias(&config).unwrap().path,
+            ["src", "cs", "linear-algebra", "spectral-analysis"]
+        );
+
+        let op = OmniPath::new(vec!["cs".into(), "c".into()], "matrix".into());
+        assert_eq!(op.unalias(&config).unwrap().path, ["src", "cs", "c"]);
+
+        let op = OmniPath::new(vec!["src".into(), "cs".into(), "c".into()], "matrix".into());
+        assert_eq!(op.unalias(&config).unwrap().path, ["src", "cs", "c"]);
+    }
+
+    #[test]
     fn test_double_unaliasing() {
         let config = Config {
             project: Project {
                 name: "proj".into(),
+                prefix_dir: None,
             },
             dir_aliases: HashMap::from([("linalg".into(), "cs/linear-algebra".into())]),
         };
@@ -179,6 +220,7 @@ mod tests {
         let config = Config {
             project: Project {
                 name: "proj".into(),
+                prefix_dir: None,
             },
             dir_aliases: HashMap::from([("linalg".into(), "cs/linear-algebra".into())]),
         };

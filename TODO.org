@@ -1,5 +1,8 @@
 * CLI
-** TODO abandon ~src~
+** DONE what to do with ~src~?
+CLOSED: [2026-01-04 Sun 13:25]
+now that we have the OmniPath stuff, it's easier to just add src when pathizing?
+or should i abandon it?
 ** DONE main should find the project root instead of just finding omni.toml
 CLOSED: [2026-01-04 Sun 00:43]
 ** DONE give the project root to commands
@@ -7,6 +10,7 @@ CLOSED: [2026-01-04 Sun 01:04]
 ** DONE consider using ~camino~ for Utf8Paths
 CLOSED: [2026-01-04 Sun 01:59]
 ** TODO add ~new~ command to CLI
+** TODO check if target in ~new~ is within the notes prefix
 ** DONE add ~slug~ package
 CLOSED: [2026-01-04 Sun 01:59]
 ** DONE define a project structure
@@ -50,7 +54,8 @@ CLOSED: [2025-12-31 Wed 15:49]
   - take the omnilinks and try to get the ~To~ part (id, file title etc.)
   - add a #metadata for each link
   - omni cli is gonna later on pick up all metadata from typst query to *gather* the links  
-** TODO add title to nodes
+** DONE add title to nodes
+CLOSED: [2026-01-04 Sun 02:14]
 ** TODO figure out how to use heading part in wasm pklugin
 ** TODO Pdf links?
 pdf is a bit fussy about links.

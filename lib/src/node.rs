@@ -206,6 +206,7 @@ mod tests {
         let config = Config {
             project: Project {
                 name: String::from("project"),
+                prefix_dir: None,
             },
             dir_aliases: HashMap::from([("linalg".into(), "linear-algebra".into())]),
         };
@@ -247,6 +248,7 @@ mod tests {
         let config = Config {
             project: Project {
                 name: String::from("project"),
+                prefix_dir: None,
             },
             dir_aliases: HashMap::from([("linalg".into(), "linear-algebra".into())]),
         };
@@ -303,6 +305,7 @@ mod tests {
         let config = Config {
             project: Project {
                 name: String::from("project"),
+                prefix_dir: None,
             },
             dir_aliases: HashMap::new(),
         };

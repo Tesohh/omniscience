@@ -28,6 +28,10 @@ pub struct Config {
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Project {
     pub name: String,
+
+    /// a single directory name where all your content should be stored.
+    /// if empty, no "prefix" will be used.
+    pub prefix_dir: Option<String>,
 }
 
 #[derive(Error, Debug, Diagnostic)]
@@ -65,6 +69,7 @@ mod tests {
         let raw_toml = r#"
         [project]
         name = "my_proj"
+        prefix_dir = "src"
 
         [dir_aliases]
         linalg = "Linear Algebra"
@@ -76,6 +81,7 @@ mod tests {
             Config {
                 project: Project {
                     name: "my_proj".into(),
+                    prefix_dir: Some("src".into()),
                 },
                 dir_aliases: HashMap::from([("linalg".into(), "Linear Algebra".into())])
             }
@@ -95,6 +101,7 @@ mod tests {
             Config {
                 project: Project {
                     name: "my_proj".into(),
+                    prefix_dir: None,
                 },
                 dir_aliases: HashMap::new()
             }

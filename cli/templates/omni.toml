@@ -1,4 +1,5 @@
 [project]
 name = "{{ name }}" 
+prefix_dir = "src"
 
 [dir_aliases]
