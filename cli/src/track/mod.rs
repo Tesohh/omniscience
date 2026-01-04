@@ -1,8 +1,8 @@
-use crate::args::TrackCommand;
+use crate::{args::TrackCommand, pretty};
 use camino::{Utf8Path, Utf8PathBuf};
 use omni::{
     config::Config,
-    node::{self, UserDb},
+    node::{self, Id, UserDb},
     omni_path::{self},
 };
 
@@ -36,6 +36,9 @@ pub enum Error {
 
     #[error("{0} is a directory")]
     IsDirectory(Utf8PathBuf),
+
+    #[error("{0} is already tracked")]
+    AlreadyTracked(Utf8PathBuf),
 }
 
 pub fn track(
@@ -80,7 +83,8 @@ pub fn track(
 
 /// core logic of track, without all input validation.
 /// assumes target is a file and exists
-/// also assumes that target is NOT already tracked.
+/// only check that it does is checking if the file is already tracked
+/// TODO: use a error type just for this
 pub fn just_track(root: impl AsRef<Utf8Path>, target: impl AsRef<Utf8Path>) -> Result<(), Error> {
     let target = target.as_ref().to_path_buf();
 
@@ -88,6 +92,27 @@ pub fn just_track(root: impl AsRef<Utf8Path>, target: impl AsRef<Utf8Path>) -> R
     let db_file = std::fs::read(&db_path)?;
 
     let mut db: UserDb = toml::from_slice(&db_file)?;
+
+    // Check that target it not already tracked
+    let canonical_target = target.canonicalize_utf8()?;
+    if db
+        .files
+        .iter()
+        .filter_map(|f| match f.path.canonicalize_utf8() {
+            Ok(p) => Some(p),
+            Err(err) => {
+                pretty::warning(format!(
+                    "invalid path found in nodes.toml for id {}. error: {}",
+                    f.id, err
+                ));
+                None
+            }
+        })
+        .any(|path| path == canonical_target)
+    {
+        return Err(Error::AlreadyTracked(target));
+    };
+
     let file_node = node::File {
         id: node::Id::new(),
         path: target.clone(),

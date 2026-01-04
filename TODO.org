@@ -44,6 +44,7 @@ and do a "partial build", to resolve some ghost links that might have existed to
 partial build would also be useful for LSP later on.
 ** TODO fix all IDs ending in 01 
 ** TODO fix possible edge case where multiple nodes are created at once, adn they all have the same id
+** TODO 
 * Tasks
 ** DONE Write a function to resolve any kind of link
 ** DONE test said function

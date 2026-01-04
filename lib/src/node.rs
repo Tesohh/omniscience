@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use camino::{Utf8Path, Utf8PathBuf};
 use miette::Diagnostic;
 use serde::{Deserialize, Serialize};
@@ -31,6 +33,12 @@ impl From<String> for Id {
 impl From<&str> for Id {
     fn from(value: &str) -> Self {
         Id(String::from(value))
+    }
+}
+
+impl Display for Id {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
