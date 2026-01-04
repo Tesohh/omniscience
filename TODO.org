@@ -42,8 +42,10 @@ CLOSED: [2026-01-02 Fri 01:49]
 ** TODO the new command should perhaps also add it's new node to build/nodes.toml 
 and do a "partial build", to resolve some ghost links that might have existed to that node.
 partial build would also be useful for LSP later on.
-** TODO fix all IDs ending in 01 
-** TODO fix possible edge case where multiple nodes are created at once, adn they all have the same id
+** DONE fix all IDs ending in 01 
+CLOSED: [2026-01-04 Sun 22:44]
+** DONE fix possible edge case where multiple nodes are created at once, adn they all have the same id
+CLOSED: [2026-01-04 Sun 22:44]
 ** TODO consider removing is_already_tracked from just_track and let callers sort it out
 * Tasks
 ** DONE Write a function to resolve any kind of link
