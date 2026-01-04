@@ -20,7 +20,7 @@ fn main() -> miette::Result<()> {
         args::Subcommand::Init(cmd) => init::init(cmd)?,
         args::Subcommand::New(cmd) => {
             let (root, config) = read_config(&config_path)?;
-            new::new(&config, cmd)?
+            new::new(&root, &config, cmd)?
         }
     }
     Ok(())

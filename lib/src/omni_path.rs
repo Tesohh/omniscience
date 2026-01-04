@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{self, Path, PathBuf};
 
 use miette::Diagnostic;
 use thiserror::Error;
@@ -17,11 +17,20 @@ pub struct OmniPath {
 pub enum Error {
     #[error("path part of omni path is empty")]
     EmptyPath,
+
+    #[error("path is empty while converting a &Path into a OmniPath")]
+    EmptyPathInConversionFromPath,
+
     #[error("omni.toml contains an empty dir_alias")]
     EmptyPathInConfig,
+
     #[error("omni path must be unaliased before pathizing it.")]
     #[diagnostic(help("this should never happen, report it to the developer"))]
     PathizeNotUnaliased,
+
+    #[error("invalid component in omni path")]
+    #[diagnostic(help("omni style paths cannot contain `.` or `..`, start with a `/`..."))]
+    InvalidComponent,
 }
 
 impl TryInto<PathBuf> for OmniPath {
@@ -37,6 +46,30 @@ impl TryInto<PathBuf> for OmniPath {
         }
 
         Ok(PathBuf::from(self.path.join("/")).join(self.name))
+    }
+}
+
+impl TryFrom<&Path> for OmniPath {
+    type Error = Error;
+
+    /// tries to convert a PathBuf into a OmniPath.
+    /// it is not guaranteed that the OmniPath will be valid of course.
+    fn try_from(value: &Path) -> Result<Self, Self::Error> {
+        if value.as_os_str().is_empty() {
+            return Err(Error::EmptyPathInConversionFromPath);
+        }
+
+        let mut path: Vec<_> = value
+            .components()
+            .map(|c| match c {
+                path::Component::Normal(os_str) => Ok(os_str.to_string_lossy().to_string()),
+                _ => Err(Error::InvalidComponent),
+            })
+            .collect::<Result<Vec<_>, Self::Error>>()?;
+
+        let name = path.pop().ok_or(Error::EmptyPathInConversionFromPath)?;
+
+        Ok(OmniPath::new(path, name))
     }
 }
 
@@ -82,6 +115,10 @@ impl OmniPath {
             name: self.name,
             unaliased: true,
         })
+    }
+
+    pub fn try_from_path(path: impl AsRef<Path>) -> Result<Self, Error> {
+        Self::try_from(path.as_ref())
     }
 }
 
@@ -167,5 +204,18 @@ mod tests {
             "path".into(),
         ))
         .unwrap();
+    }
+
+    #[test]
+    fn test_tryfrom() {
+        let op = OmniPath::try_from(PathBuf::from("linalg/matrix").as_path()).unwrap();
+        assert_eq!(op.path, ["linalg"]);
+        assert_eq!(op.name, "matrix");
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_tryfrom_fail() {
+        OmniPath::try_from(PathBuf::from("../linalg/matrix").as_path()).unwrap();
     }
 }
