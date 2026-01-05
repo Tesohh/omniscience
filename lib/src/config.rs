@@ -11,7 +11,7 @@ static OMNI_TOML: &str = "omni.toml";
 
 /// config contained in `omni.toml`,
 /// which also counts as project root.
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Default)]
 pub struct Config {
     pub project: Project,
 
@@ -35,6 +35,15 @@ pub struct Project {
     /// a single directory name where all your content should be stored.
     /// if empty, no "prefix" will be used.
     pub prefix_dir: Option<String>,
+}
+
+impl Default for Project {
+    fn default() -> Self {
+        Self {
+            name: String::from("project"),
+            prefix_dir: Default::default(),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Default)]
