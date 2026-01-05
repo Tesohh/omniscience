@@ -15,6 +15,9 @@ static OMNI_TOML: &str = "omni.toml";
 pub struct Config {
     pub project: Project,
 
+    #[serde(default)]
+    pub typst: Typst,
+
     // we need a non-random hasher because wasi doesn't support having a random seed
     #[cfg(target_arch = "wasm32")]
     #[serde(default)]
@@ -32,6 +35,27 @@ pub struct Project {
     /// a single directory name where all your content should be stored.
     /// if empty, no "prefix" will be used.
     pub prefix_dir: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Default)]
+pub struct Typst {
+    #[serde(default)]
+    pub output_format: TypstOutputFormat,
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "snake_case")]
+pub enum TypstOutputFormat {
+    Html,
+    Pdf,
+    #[serde(rename = "html+pdf")]
+    HtmlAndPdf,
+}
+
+impl Default for TypstOutputFormat {
+    fn default() -> Self {
+        Self::HtmlAndPdf
+    }
 }
 
 #[derive(Error, Debug, Diagnostic)]
@@ -71,6 +95,9 @@ mod tests {
         name = "my_proj"
         prefix_dir = "src"
 
+        [typst]
+        output_format = "html+pdf"
+
         [dir_aliases]
         linalg = "Linear Algebra"
         "#;
@@ -82,6 +109,9 @@ mod tests {
                 project: Project {
                     name: "my_proj".into(),
                     prefix_dir: Some("src".into()),
+                },
+                typst: Typst {
+                    output_format: TypstOutputFormat::HtmlAndPdf,
                 },
                 dir_aliases: HashMap::from([("linalg".into(), "Linear Algebra".into())])
             }
@@ -103,6 +133,7 @@ mod tests {
                     name: "my_proj".into(),
                     prefix_dir: None,
                 },
+                typst: Typst::default(),
                 dir_aliases: HashMap::new()
             }
         )

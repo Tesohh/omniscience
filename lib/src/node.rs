@@ -204,7 +204,7 @@ impl Db {
 mod tests {
     use std::collections::HashMap;
 
-    use crate::config::Project;
+    use crate::config::{self, Project};
 
     use super::*;
 
@@ -236,6 +236,7 @@ mod tests {
                 name: String::from("project"),
                 prefix_dir: None,
             },
+            typst: config::Typst::default(),
             dir_aliases: HashMap::from([("linalg".into(), "linear-algebra".into())]),
         };
 
@@ -278,6 +279,7 @@ mod tests {
                 name: String::from("project"),
                 prefix_dir: None,
             },
+            typst: config::Typst::default(),
             dir_aliases: HashMap::from([("linalg".into(), "linear-algebra".into())]),
         };
 
@@ -335,6 +337,7 @@ mod tests {
                 name: String::from("project"),
                 prefix_dir: None,
             },
+            typst: config::Typst::default(),
             dir_aliases: HashMap::new(),
         };
 

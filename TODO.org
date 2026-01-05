@@ -1,3 +1,7 @@
+* CORE
+** TODO move tracking logic to core
+** TODO implement shallow builds
+** TODO implement partial builds
 * CLI
 ** DONE what to do with ~src~?
 CLOSED: [2026-01-04 Sun 13:25]
@@ -47,6 +51,7 @@ CLOSED: [2026-01-04 Sun 22:44]
 ** DONE fix possible edge case where multiple nodes are created at once, adn they all have the same id
 CLOSED: [2026-01-04 Sun 22:44]
 ** TODO consider removing is_already_tracked from just_track and let callers sort it out
+** TODO Add a ~private~ property to nodes
 * Tasks
 ** DONE Write a function to resolve any kind of link
 ** DONE test said function

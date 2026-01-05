@@ -132,7 +132,7 @@ impl OmniPath {
 mod tests {
     use std::collections::HashMap;
 
-    use crate::config::Project;
+    use crate::config::{self, Project};
 
     use super::*;
 
@@ -143,6 +143,7 @@ mod tests {
                 name: "proj".into(),
                 prefix_dir: None,
             },
+            typst: config::Typst::default(),
             dir_aliases: HashMap::from([("linalg".into(), "cs/linear-algebra".into())]),
         };
 
@@ -169,6 +170,7 @@ mod tests {
                 name: "proj".into(),
                 prefix_dir: Some("src".into()),
             },
+            typst: config::Typst::default(),
             dir_aliases: HashMap::from([("linalg".into(), "cs/linear-algebra".into())]),
         };
 
@@ -201,6 +203,7 @@ mod tests {
                 name: "proj".into(),
                 prefix_dir: None,
             },
+            typst: config::Typst::default(),
             dir_aliases: HashMap::from([("linalg".into(), "cs/linear-algebra".into())]),
         };
 
@@ -222,6 +225,7 @@ mod tests {
                 name: "proj".into(),
                 prefix_dir: None,
             },
+            typst: config::Typst::default(),
             dir_aliases: HashMap::from([("linalg".into(), "cs/linear-algebra".into())]),
         };
 
