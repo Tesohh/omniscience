@@ -1,6 +1,7 @@
+use crate::format::typst::Format;
 use std::process::{Command, Stdio};
 
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8Path;
 use miette::Diagnostic;
 use thiserror::Error;
 
@@ -14,11 +15,6 @@ pub enum CompileError {
 
     #[error("io error")]
     IoError(#[from] std::io::Error),
-}
-
-pub enum Format {
-    Pdf,
-    Html,
 }
 
 /// Runs `typst compile` on `target`
@@ -59,8 +55,6 @@ pub fn compile(
         Err(err) => return Err(err.into()),
     };
 
-    dbg!(&output);
-
     if !output.status.success() {
         return Err(CompileError::TypstError(
             output.status.code().unwrap_or_default(),
@@ -72,6 +66,7 @@ pub fn compile(
 
 #[cfg(test)]
 mod tests {
+    use camino::Utf8PathBuf;
     use tempfile::tempdir;
 
     use super::*;
