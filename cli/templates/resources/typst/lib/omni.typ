@@ -59,13 +59,15 @@
       ghost-link[#node.content]
       [#metadata((
         content: node.content,
-        to: "ghost", // TODO: put file part here
+        to: file_part,
+        ghost: true,
       )) <omni-link>]
     } else {
-      link(node.target)[#node.target]
+      link(node.target)[#node.content]
       [#metadata((
         content: node.content,
         to: node.to,
+        ghost: false,
       )) <omni-link>]
     }
   }

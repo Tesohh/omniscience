@@ -12,7 +12,10 @@ pub enum QueryError {
     MissingTypst,
 
     #[error("`typst query` exited with code {0}")]
-    TypstError(i32),
+    TypstErrorCode(i32),
+
+    #[error("`typst query` error (code {0}): {1}")]
+    TypstError(i32, String),
 
     #[error("io error")]
     IoError(#[from] std::io::Error),
@@ -23,10 +26,10 @@ pub enum QueryError {
 
 #[derive(Default)]
 pub struct QueryParams<'a> {
-    format: Format,
-    silent: bool,
-    one: bool,
-    field: Option<&'a str>,
+    pub format: Format,
+    pub silent: bool,
+    pub one: bool,
+    pub field: Option<&'a str>,
 }
 
 /// Runs `typst query` on `target` and deserializes json output as `T`.
@@ -79,12 +82,17 @@ where
     };
 
     if !output.status.success() {
-        return Err(QueryError::TypstError(
-            output.status.code().unwrap_or_default(),
-        ));
+        if params.silent {
+            return Err(QueryError::TypstError(
+                output.status.code().unwrap_or_default(),
+                String::from_utf8_lossy(&output.stderr).to_string(),
+            ));
+        } else {
+            return Err(QueryError::TypstErrorCode(
+                output.status.code().unwrap_or_default(),
+            ));
+        }
     }
-
-    dbg!(String::from_utf8_lossy(&output.stdout));
 
     let value: T = serde_json::from_slice(output.stdout.as_slice())?;
 

@@ -11,7 +11,10 @@ pub enum CompileError {
     MissingTypst,
 
     #[error("`typst compile` exited with code {0}")]
-    TypstError(i32),
+    TypstErrorCode(i32),
+
+    #[error("`typst compile` error (code {0}): {1}")]
+    TypstError(i32, String),
 
     #[error("io error")]
     IoError(#[from] std::io::Error),
@@ -56,9 +59,16 @@ pub fn compile(
     };
 
     if !output.status.success() {
-        return Err(CompileError::TypstError(
-            output.status.code().unwrap_or_default(),
-        ));
+        if silent {
+            return Err(CompileError::TypstError(
+                output.status.code().unwrap_or_default(),
+                String::from_utf8_lossy(&output.stderr).to_string(),
+            ));
+        } else {
+            return Err(CompileError::TypstErrorCode(
+                output.status.code().unwrap_or_default(),
+            ));
+        }
     }
 
     Ok(())

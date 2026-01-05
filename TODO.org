@@ -2,6 +2,7 @@
 ** TODO move tracking logic to core
 ** TODO implement shallow builds
 ** TODO implement partial builds
+** TODO consider using HashSet for build/nodes and build/links 
 * CLI
 ** DONE what to do with ~src~?
 CLOSED: [2026-01-04 Sun 13:25]
