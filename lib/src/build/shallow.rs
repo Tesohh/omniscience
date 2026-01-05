@@ -6,7 +6,8 @@ use thiserror::Error;
 use crate::{
     config::Config,
     format::typst::{self, QueryParams},
-    link, node,
+    link,
+    node::{self, Node},
 };
 
 #[derive(Debug, Error, Diagnostic)]
@@ -27,6 +28,9 @@ pub enum ShallowError {
 
     #[error(transparent)]
     TypstQueryError(#[from] typst::QueryError),
+
+    #[error(transparent)]
+    IoError(#[from] std::io::Error),
 }
 
 #[derive(Debug, Deserialize)]
@@ -53,13 +57,14 @@ pub fn shallow(
     file: &node::File,
 ) -> Result<(), ShallowError> {
     // figure out the file format (for now accept only typst) and reject invalid formats
+    let my_path_canonical = root.as_ref().join(&file.path).canonicalize_utf8()?;
     let extension = file.path.extension().ok_or(ShallowError::NoFormat)?;
 
     if extension == "typ" {
         // query the file to ask for omni-frontmatter
         let frontmatter: Frontmatter = typst::query(
             &root,
-            &file.path,
+            &my_path_canonical,
             "<omni-frontmatter>",
             &QueryParams {
                 format: typst::Format::Html,
@@ -90,13 +95,43 @@ pub fn shallow(
             },
         )?;
 
-        // compile to html and pdf
+        // WARN: this assumes that paths in build/nodes.toml are already canonical and valid
+        let maybe_node = nodes
+            .nodes
+            .iter_mut()
+            .find(|node| node.path == my_path_canonical);
+
+        // update node, and get my id while i'm at it
+        let my_id = match maybe_node {
+            Some(node) => {
+                node.title = frontmatter.title;
+                node.names = frontmatter.names;
+                node.tags = frontmatter.tags;
+
+                &node.id
+            }
+            None => {
+                nodes.nodes.push(Node {
+                    id: file.id.clone(),
+                    path: my_path_canonical,
+                    kind: node::NodeKind::File,
+                    title: frontmatter.title,
+                    names: frontmatter.names,
+                    tags: frontmatter.tags,
+                });
+
+                &file.id
+            }
+        };
+
+        dbg!(&nodes);
+
+    // update links
+
+    // compile to html and pdf
     } else {
         return Err(ShallowError::InvalidFormat(extension.to_string()));
     }
-
-    // update nodes
-    // update links
 
     Ok(())
 }
@@ -114,13 +149,13 @@ mod tests {
     #[test]
     fn test_shallow_build_typst() -> Result<(), Box<dyn std::error::Error>> {
         let tempdir = tempdir()?;
-        let root = Utf8PathBuf::try_from(tempdir.path().to_path_buf())?;
+        let root = Utf8PathBuf::try_from(tempdir.path().to_path_buf())?.canonicalize_utf8()?;
 
         let config = Config::default();
         let mut nodes = node::Db {
             nodes: vec![Node {
                 id: "id1".into(),
-                path: "vector.typ".into(),
+                path: root.join("vector.typ"),
                 kind: node::NodeKind::File,
                 title: "Vector".into(),
                 names: vec!["vector".into()],
@@ -138,9 +173,18 @@ mod tests {
             tags: ("linalg", "matrix", "linear"),
             names: ("matrix", "matrices")
         )) <omni-frontmatter>
-        #metadata(()) <omni-link>
-        #metadata("id2") <omni-link>
-        #metadata("id3") <omni-link>
+        
+        #metadata((
+            content: "vector",
+            to: "id1",
+            ghost: false,
+        )) <omni-link>
+
+        #metadata((
+            content: "singular matrix",
+            to: "singularity",
+            ghost: true,
+        )) <omni-link>
 
         = Top
         == Mid
@@ -154,7 +198,7 @@ mod tests {
         };
 
         shallow(&root, &config, &mut nodes, &mut links, &file)?;
-        panic!();
+        panic!(); // TEMP:
 
         Ok(())
     }
@@ -162,13 +206,13 @@ mod tests {
     #[test]
     fn test_shallow_build_format_fail() -> Result<(), Box<dyn std::error::Error>> {
         let tempdir = tempdir()?;
-        let root = Utf8PathBuf::try_from(tempdir.path().to_path_buf())?;
+        let root = Utf8PathBuf::try_from(tempdir.path().to_path_buf())?.canonicalize_utf8()?;
 
         let config = Config::default();
         let mut nodes = node::Db {
             nodes: vec![Node {
                 id: "id1".into(),
-                path: "vector.typ".into(),
+                path: root.join("vector.typ"),
                 kind: node::NodeKind::File,
                 title: "Vector".into(),
                 names: vec!["vector".into()],
@@ -177,6 +221,7 @@ mod tests {
         };
         let mut links = link::Db { links: vec![] };
 
+        std::fs::write(root.join("matrix"), "")?;
         let file = node::File {
             id: "id2".into(),
             path: "matrix".into(),
@@ -190,6 +235,7 @@ mod tests {
             ShallowError::NoFormat.to_string()
         );
 
+        std::fs::write(root.join("matrix.CRAZYFORMAT"), "")?;
         let file = node::File {
             id: "id2".into(),
             path: "matrix.CRAZYFORMAT".into(),

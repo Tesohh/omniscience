@@ -56,26 +56,31 @@ pub struct File {
 }
 
 impl File {
-    pub fn into_node(self, title: String, names: Vec<String>, tags: Vec<String>) -> Node {
-        Node {
+    pub fn into_node(
+        self,
+        title: String,
+        names: Vec<String>,
+        tags: Vec<String>,
+    ) -> Result<Node, std::io::Error> {
+        Ok(Node {
             id: self.id,
-            path: self.path,
+            path: self.path.canonicalize_utf8()?,
             kind: NodeKind::File,
             title,
             names,
             tags,
-        }
+        })
     }
 
-    pub fn into_node_barebones(self) -> Node {
-        Node {
+    pub fn into_node_barebones(self) -> Result<Node, std::io::Error> {
+        Ok(Node {
             id: self.id,
-            path: self.path,
+            path: self.path.canonicalize_utf8()?,
             kind: NodeKind::File,
             title: String::from(""),
             names: vec![],
             tags: vec![],
-        }
+        })
     }
 }
 
@@ -99,6 +104,7 @@ pub enum NodeKind {
 /// Fully resolved node,
 /// made by taking a `File` or (in future) other kinds of nodes,
 /// finding names and tags and putting them in here.
+/// the path is assumed by some functions to be already canonicalized.
 pub struct Node {
     pub id: Id,
     pub path: Utf8PathBuf,
