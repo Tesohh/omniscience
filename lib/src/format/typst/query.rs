@@ -3,7 +3,7 @@ use std::process::{Command, Stdio};
 
 use camino::Utf8Path;
 use miette::Diagnostic;
-use serde::{Deserialize, de::DeserializeOwned};
+use serde::de::DeserializeOwned;
 use thiserror::Error;
 
 #[derive(Debug, Error, Diagnostic)]
