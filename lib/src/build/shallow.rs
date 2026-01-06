@@ -83,7 +83,7 @@ pub fn shallow(
         })?;
 
         // query the file to ask for omni-links
-        let links: Vec<Link> = typst::query(
+        let new_links: Vec<Link> = typst::query(
             &root,
             &file.path,
             "<omni-link>",
@@ -124,11 +124,30 @@ pub fn shallow(
             }
         };
 
-        dbg!(&nodes);
+        // remove all links from my_id
+        links.links.retain(|l| &l.from != my_id);
 
-    // update links
+        // add new links
+        let new_links = new_links.iter().filter_map(|l| {
+            let to = match l.ghost {
+                false => link::To::Id(l.to.clone().into()),
+                true => {
+                    let filepart = link::FilePart::from_typst_style(&l.to)?;
+                    link::To::Ghost(filepart)
+                }
+            };
 
-    // compile to html and pdf
+            Some(link::Link {
+                from: my_id.clone(),
+                to,
+                location: None, // TODO:
+                alias: None,    // TODO:
+            })
+        });
+
+        links.links.extend(new_links);
+
+        // compile to html and pdf
     } else {
         return Err(ShallowError::InvalidFormat(extension.to_string()));
     }
@@ -163,7 +182,14 @@ mod tests {
             }],
         };
 
-        let mut links = link::Db { links: vec![] };
+        let mut links = link::Db {
+            links: vec![link::Link {
+                from: "id2".into(),
+                to: link::To::Id("id4555".into()),
+                location: None,
+                alias: None,
+            }],
+        };
 
         // we want to shallow build a new matrix.typ file
 

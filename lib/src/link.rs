@@ -57,6 +57,27 @@ pub enum FilePart {
     PathAndName(Vec<String>, String),
 }
 
+impl FilePart {
+    pub fn from_typst_style(raw: &str) -> Option<Self> {
+        let file_splits: Vec<_> = raw.split(".").collect();
+        if file_splits.is_empty() {
+            None
+        } else if file_splits.len() == 1 {
+            let title = file_splits[0].to_string();
+            Some(FilePart::Name(title))
+        } else {
+            let mut path = vec![];
+            for component in file_splits.iter().take(file_splits.len() - 1) {
+                path.push(component.to_string());
+            }
+
+            let last = file_splits.last().expect("slice should never be empty");
+            let title = last.to_string();
+            Some(FilePart::PathAndName(path, title))
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum HeadingPart {

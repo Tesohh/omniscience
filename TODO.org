@@ -3,6 +3,8 @@
 ** TODO implement shallow builds
 ** TODO implement partial builds
 ** TODO consider using HashSet for build/nodes and build/links 
+** TODO Consider separating link and frontmatter gathering from compilation, to avoid double compilation
+for markdown though, where we need a parser, do we parse it twice? hold the ast somewhere?
 * CLI
 ** DONE what to do with ~src~?
 CLOSED: [2026-01-04 Sun 13:25]
