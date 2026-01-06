@@ -4,8 +4,11 @@ use serde::Deserialize;
 use thiserror::Error;
 
 use crate::{
-    config::Config,
-    format::typst::{self, QueryParams},
+    config::{self, Config},
+    format::{
+        src_to_build_path,
+        typst::{self, QueryParams},
+    },
     link,
     node::{self, Node},
 };
@@ -28,6 +31,9 @@ pub enum ShallowError {
 
     #[error(transparent)]
     TypstQueryError(#[from] typst::QueryError),
+
+    #[error(transparent)]
+    TypstCompileError(#[from] typst::CompileError),
 
     #[error(transparent)]
     IoError(#[from] std::io::Error),
@@ -55,16 +61,17 @@ pub fn shallow(
     nodes: &mut node::Db,
     links: &mut link::Db,
     file: &node::File,
+    compile: bool,
 ) -> Result<(), ShallowError> {
     // figure out the file format (for now accept only typst) and reject invalid formats
-    let my_path_canonical = root.as_ref().join(&file.path).canonicalize_utf8()?;
+    let my_path_canon = root.as_ref().join(&file.path).canonicalize_utf8()?;
     let extension = file.path.extension().ok_or(ShallowError::NoFormat)?;
 
     if extension == "typ" {
         // query the file to ask for omni-frontmatter
         let frontmatter: Frontmatter = typst::query(
             &root,
-            &my_path_canonical,
+            &my_path_canon,
             "<omni-frontmatter>",
             &QueryParams {
                 format: typst::Format::Html,
@@ -82,24 +89,11 @@ pub fn shallow(
             _ => err.into(),
         })?;
 
-        // query the file to ask for omni-links
-        let new_links: Vec<Link> = typst::query(
-            &root,
-            &file.path,
-            "<omni-link>",
-            &QueryParams {
-                format: typst::Format::Html,
-                silent: true,
-                one: false,
-                field: Some("value"),
-            },
-        )?;
-
         // WARN: this assumes that paths in build/nodes.toml are already canonical and valid
         let maybe_node = nodes
             .nodes
             .iter_mut()
-            .find(|node| node.path == my_path_canonical);
+            .find(|node| node.path == my_path_canon);
 
         // update node, and get my id while i'm at it
         let my_id = match maybe_node {
@@ -113,7 +107,7 @@ pub fn shallow(
             None => {
                 nodes.nodes.push(Node {
                     id: file.id.clone(),
-                    path: my_path_canonical,
+                    path: my_path_canon.clone(),
                     kind: node::NodeKind::File,
                     title: frontmatter.title,
                     names: frontmatter.names,
@@ -123,6 +117,19 @@ pub fn shallow(
                 &file.id
             }
         };
+
+        // query the file to ask for omni-links
+        let new_links: Vec<Link> = typst::query(
+            &root,
+            &my_path_canon,
+            "<omni-link>",
+            &QueryParams {
+                format: typst::Format::Html,
+                silent: true,
+                one: false,
+                field: Some("value"),
+            },
+        )?;
 
         // remove all links from my_id
         links.links.retain(|l| &l.from != my_id);
@@ -148,6 +155,35 @@ pub fn shallow(
         links.links.extend(new_links);
 
         // compile to html and pdf
+        // NOTE: this could be useful when doing "incremental" builds for lsp etc.
+        // FOR FULL BUILDS we want to just gather links and frontmatters
+        // THEN at the end, take all nodes in the build/nodes dartabase and COMPILE rthem
+        if compile {
+            let out_html = src_to_build_path(&root, &my_path_canon, "html")
+                .expect("both paths should be canonical");
+
+            let mut out_pdf = out_html.clone();
+            out_pdf.set_extension("pdf");
+
+            if let Some(parent) = out_html.parent()
+                && !std::fs::exists(parent)?
+            {
+                std::fs::create_dir_all(parent)?;
+            }
+
+            match config.typst.output_format {
+                config::TypstOutputFormat::Html => {
+                    typst::compile(&root, &my_path_canon, out_html, typst::Format::Html, true)?;
+                }
+                config::TypstOutputFormat::Pdf => {
+                    typst::compile(&root, &my_path_canon, out_pdf, typst::Format::Pdf, true)?;
+                }
+                config::TypstOutputFormat::HtmlAndPdf => {
+                    typst::compile(&root, &my_path_canon, out_html, typst::Format::Html, true)?;
+                    typst::compile(&root, &my_path_canon, out_pdf, typst::Format::Pdf, true)?;
+                }
+            }
+        }
     } else {
         return Err(ShallowError::InvalidFormat(extension.to_string()));
     }
@@ -223,8 +259,50 @@ mod tests {
             path: "matrix.typ".into(),
         };
 
-        shallow(&root, &config, &mut nodes, &mut links, &file)?;
-        panic!(); // TEMP:
+        shallow(&root, &config, &mut nodes, &mut links, &file, true)?;
+
+        assert_eq!(
+            nodes.nodes,
+            vec![
+                Node {
+                    id: "id1".into(),
+                    path: root.join("vector.typ"),
+                    kind: node::NodeKind::File,
+                    title: "Vector".into(),
+                    names: vec!["vector".into()],
+                    tags: vec![],
+                },
+                Node {
+                    id: file.id,
+                    path: root.join(file.path),
+                    kind: node::NodeKind::File,
+                    title: "Matrix".into(),
+                    names: vec!["matrix".into(), "matrices".into()],
+                    tags: vec!["linalg".into(), "matrix".into(), "linear".into()],
+                }
+            ]
+        );
+
+        assert_eq!(
+            links.links,
+            vec![
+                link::Link {
+                    from: "id2".into(),
+                    to: link::To::Id("id1".into()),
+                    location: None,
+                    alias: None
+                },
+                link::Link {
+                    from: "id2".into(),
+                    to: link::To::Ghost(link::FilePart::Name("singularity".into())),
+                    location: None,
+                    alias: None
+                }
+            ],
+        );
+
+        assert!(std::fs::exists(root.join("build/matrix.html"))?);
+        assert!(std::fs::exists(root.join("build/matrix.pdf"))?);
 
         Ok(())
     }
@@ -254,7 +332,7 @@ mod tests {
         };
 
         assert_eq!(
-            shallow(&root, &config, &mut nodes, &mut links, &file)
+            shallow(&root, &config, &mut nodes, &mut links, &file, false)
                 .err()
                 .unwrap()
                 .to_string(),
@@ -268,7 +346,7 @@ mod tests {
         };
 
         assert_eq!(
-            shallow(&root, &config, &mut nodes, &mut links, &file)
+            shallow(&root, &config, &mut nodes, &mut links, &file, false)
                 .err()
                 .unwrap()
                 .to_string(),

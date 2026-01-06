@@ -2,9 +2,15 @@
 ** TODO move tracking logic to core
 ** TODO implement shallow builds
 ** TODO implement partial builds
-** TODO consider using HashSet for build/nodes and build/links 
-** TODO Consider separating link and frontmatter gathering from compilation, to avoid double compilation
-for markdown though, where we need a parser, do we parse it twice? hold the ast somewhere?
+** DONE KILL consider using HashSet for build/nodes and build/links 
+CLOSED: [2026-01-06 Tue 13:46]
+** DONE Consider separating link and frontmatter gathering from compilation, to avoid double compilation
+CLOSED: [2026-01-06 Tue 13:45]
+Easy solution:
+- shallow build has a "compile" argument
+- regular "incremental" builds from lsp, etc. WILL compile
+- full builds will NOT compile. just resolve all nodes and links, then at the end compile all files (in parallel?)
+** TODO separate typst build logic
 * CLI
 ** DONE what to do with ~src~?
 CLOSED: [2026-01-04 Sun 13:25]
