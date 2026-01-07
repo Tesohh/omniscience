@@ -1,9 +1,10 @@
 #import "/resources/typst/templates/note.typ": note;
 
+{% raw %}
 #show: note.with(
-  title: "",
+  title: "{{ title }}",
   tags: (),
-  names: (),
+  names: ("{{ name }}",),
 )
-
+{% endraw %}
 

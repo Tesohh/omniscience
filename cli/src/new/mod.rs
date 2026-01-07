@@ -132,9 +132,10 @@ pub fn new(
     };
 
     // apply template
-    let context = tera::Context::new();
-    // TODO: insert more contexts...
-    // context.insert("title", (&cmd.path).file_stem().unwrap_or_default());
+    let mut context = tera::Context::new();
+    let title = target.file_stem().unwrap_or_default();
+    context.insert("title", title);
+    context.insert("name", title);
 
     let new_content = Tera::one_off(&template, &context, false)?;
     file.write_all(new_content.as_bytes())?;
@@ -154,7 +155,6 @@ pub fn new(
         Err(err) => return Err(err.into()),
     };
     let mut nodes: node::Db = toml::from_slice(&nodes_file)?;
-    dbg!(&nodes);
 
     // read links
     let links_file = match std::fs::read(root.join("build/links.toml")) {

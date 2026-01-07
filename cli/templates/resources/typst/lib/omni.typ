@@ -22,7 +22,7 @@
   [#metadata((
     title: title,
     tags: tags,
-    names: (),
+    names: names,
   )) <omni-frontmatter>]
 
   show ref: it => {

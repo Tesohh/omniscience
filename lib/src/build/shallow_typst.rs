@@ -87,8 +87,8 @@ pub fn shallow_typst(
         let to = match l.ghost {
             false => link::To::Id(l.to.clone().into()),
             true => {
-                let filepart = link::FilePart::from_typst_style(&l.to)?;
-                link::To::Ghost(filepart)
+                let filepart = link::FilePart::from_typst_style(&l.to);
+                link::To::Ghost(filepart?)
             }
         };
 

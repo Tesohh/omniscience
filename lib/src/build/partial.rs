@@ -65,8 +65,6 @@ pub fn partial(
                 },
             };
 
-            dbg!(&node);
-
             if node.id != file.id {
                 continue;
             }

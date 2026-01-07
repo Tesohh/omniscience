@@ -14,6 +14,11 @@ Easy solution:
 - full builds will NOT compile. just resolve all nodes and links, then at the end compile all files (in parallel?)
 ** DONE separate typst build logic
 CLOSED: [2026-01-06 Tue 14:07]
+** DONE fix typst::compile outputting empty files
+
+CLOSED: [2026-01-07 Wed 18:28]
+this is actually intended behaviour, as the files with the ghost links are never built, and thus their links are never added
+** TODO add FULL CLI build
 * CLI
 ** DONE what to do with ~src~?
 CLOSED: [2026-01-04 Sun 13:25]
