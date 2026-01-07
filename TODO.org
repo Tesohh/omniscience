@@ -2,7 +2,8 @@
 ** TODO move tracking logic to core
 ** DONE implement shallow builds
 CLOSED: [2026-01-06 Tue 20:44]
-** TODO implement partial builds
+** DONE implement partial builds
+CLOSED: [2026-01-07 Wed 14:02]
 ** DONE KILL consider using HashSet for build/nodes and build/links 
 CLOSED: [2026-01-06 Tue 13:46]
 ** DONE Consider separating link and frontmatter gathering from compilation, to avoid double compilation

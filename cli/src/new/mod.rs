@@ -3,6 +3,7 @@ use std::io::Write;
 use camino::{Utf8Path, Utf8PathBuf};
 use omni::{
     config::Config,
+    link, node,
     omni_path::{self, OmniPath},
 };
 use tera::Tera;
@@ -28,6 +29,9 @@ pub enum Error {
 
     #[error("track error")]
     TrackError(#[from] track::Error),
+
+    #[error(transparent)]
+    PartialBuildError(#[from] omni::build::partial::PartialError),
 
     #[error("path given has no parent")]
     #[diagnostic(help("might be root or empty?"))]
@@ -136,7 +140,42 @@ pub fn new(
     file.write_all(new_content.as_bytes())?;
 
     // track file
-    track::just_track(root, target)?;
+    let file_node = track::just_track(root, target)?;
+
+    // run a partial build
+    // read nodes
+    let nodes_file = match std::fs::read(root.join("build/nodes.toml")) {
+        Ok(bytes) => bytes,
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
+            pretty::debug("created build/nodes.toml");
+            std::fs::File::create(root.join("build/nodes.toml"))?;
+            vec![]
+        }
+        Err(err) => return Err(err.into()),
+    };
+    let mut nodes: node::Db = toml::from_slice(&nodes_file)?;
+    dbg!(&nodes);
+
+    // read links
+    let links_file = match std::fs::read(root.join("build/links.toml")) {
+        Ok(bytes) => bytes,
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
+            pretty::debug("created build/links.toml");
+            std::fs::File::create(root.join("build/links.toml"))?;
+            vec![]
+        }
+        Err(err) => return Err(err.into()),
+    };
+    let mut links: link::Db = toml::from_slice(&links_file)?;
+
+    omni::build::partial::partial(root, config, &mut nodes, &mut links, &file_node, true)?;
+
+    // SAVEPOINT(nodes, links) after a partial build
+    let new_nodes_toml = toml::to_string(&nodes)?;
+    std::fs::write(root.join("build/nodes.toml"), new_nodes_toml)?;
+
+    let new_links_toml = toml::to_string(&links)?;
+    std::fs::write(root.join("build/links.toml"), new_links_toml)?;
 
     Ok(())
 }

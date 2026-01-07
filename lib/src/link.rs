@@ -141,6 +141,7 @@ impl UnresolvedLink {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Db {
     #[serde(rename = "link")]
+    #[serde(default)]
     pub links: Vec<Link>,
 }
 

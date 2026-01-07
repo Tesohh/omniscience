@@ -78,7 +78,8 @@ pub fn track(
         Err(err) => return Err(err.into()),
     };
 
-    just_track(root, target)
+    just_track(root, target)?;
+    Ok(())
 }
 
 pub fn is_already_tracked(db: &UserDb, target: impl AsRef<Utf8Path>) -> Result<bool, Error> {
@@ -103,7 +104,10 @@ pub fn is_already_tracked(db: &UserDb, target: impl AsRef<Utf8Path>) -> Result<b
 /// assumes target is a file and exists
 /// only check that it does is checking if the file is already tracked
 /// TODO: use a error type just for this
-pub fn just_track(root: impl AsRef<Utf8Path>, target: impl AsRef<Utf8Path>) -> Result<(), Error> {
+pub fn just_track(
+    root: impl AsRef<Utf8Path>,
+    target: impl AsRef<Utf8Path>,
+) -> Result<node::File, Error> {
     let target = target.as_ref().to_path_buf();
 
     let db_path = root.as_ref().join("nodes.toml");
@@ -122,8 +126,10 @@ pub fn just_track(root: impl AsRef<Utf8Path>, target: impl AsRef<Utf8Path>) -> R
     };
     db.files.push(file_node.clone());
 
+    // SAVEPOINT(user_db)
+
     let new_toml = toml::to_string(&db)?;
     std::fs::write(db_path, new_toml)?;
 
-    Ok(())
+    Ok(file_node)
 }
