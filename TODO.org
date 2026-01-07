@@ -20,8 +20,10 @@ CLOSED: [2026-01-07 Wed 18:28]
 this is actually intended behaviour, as the files with the ghost links are never built, and thus their links are never added
 ** DONE add FULL CLI build
 CLOSED: [2026-01-07 Wed 21:19]
-** TODO speed up full builds
-** TODO make full build take less (eg. parallel compiles, incremental compiles...)
+** DONE speed up full builds
+CLOSED: [2026-01-07 Wed 23:43]
+** DONE make full build take less (eg. parallel compiles, incremental compiles...)
+CLOSED: [2026-01-07 Wed 23:43]
 ** TODO use https://github.com/ParkMyCar/compact_str for IDs
 * CLI
 ** DONE what to do with ~src~?

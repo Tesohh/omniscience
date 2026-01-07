@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use camino::{Utf8Path, Utf8PathBuf};
+use compact_str::{CompactString, ToCompactString};
 use miette::Diagnostic;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -8,7 +9,7 @@ use thiserror::Error;
 use crate::{config::Config, link, node};
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Eq, Clone, Hash)]
-pub struct Id(pub String);
+pub struct Id(pub CompactString);
 
 impl Id {
     /// YYYYMMDDHHMM
@@ -27,19 +28,16 @@ impl Id {
             id = format!("{}-{:02x}", id, count)
         }
 
-        Self(id)
+        Self(id.to_compact_string())
     }
 }
 
-impl From<String> for Id {
-    fn from(value: String) -> Self {
-        Id(value)
-    }
-}
-
-impl From<&str> for Id {
-    fn from(value: &str) -> Self {
-        Id(String::from(value))
+impl<T> From<T> for Id
+where
+    T: Into<CompactString>,
+{
+    fn from(value: T) -> Self {
+        Id(value.into())
     }
 }
 
