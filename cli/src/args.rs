@@ -20,6 +20,7 @@ pub enum Subcommand {
     Init(InitCommand),
     New(NewCommand),
     Track(TrackCommand),
+    Build(BuildCommand),
 }
 
 #[derive(clap::Parser, Debug)]
@@ -46,6 +47,12 @@ pub struct NewCommand {
 pub struct TrackCommand {
     /// path to the file you want to track.
     pub path: Utf8PathBuf,
+}
+
+#[derive(clap::Parser, Debug)]
+/// Performs a full build if no arguments provided, partial build if path specified
+pub struct BuildCommand {
+    pub path: Option<Utf8PathBuf>,
 }
 
 pub const CLAP_STYLING: clap::builder::styling::Styles = clap::builder::styling::Styles::styled()

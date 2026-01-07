@@ -3,7 +3,12 @@ use miette::Diagnostic;
 use serde::Deserialize;
 use thiserror::Error;
 
-use crate::{build::shallow_typst, config::Config, format::typst, link, node};
+use crate::{
+    build::{compile, shallow_typst},
+    config::Config,
+    format::typst,
+    link, node,
+};
 use shallow_typst::shallow_typst;
 
 #[derive(Debug, Error, Diagnostic)]
@@ -21,6 +26,9 @@ pub enum ShallowError {
         "there's probably something wrong with your /resources/typst/lib/omni.typ, as that should generate a frontmatter"
     ))]
     MissingFrontmatter,
+
+    #[error(transparent)]
+    CompileError(#[from] compile::CompileError),
 
     #[error(transparent)]
     TypstQueryError(#[from] typst::QueryError),

@@ -50,6 +50,8 @@ pub fn compile(
         Format::Html => command.args(["--format", "html", "--features", "html"]),
     };
 
+    let exec_time = std::time::Instant::now();
+
     let output = match command.output() {
         Ok(o) => o,
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
@@ -57,6 +59,10 @@ pub fn compile(
         }
         Err(err) => return Err(err.into()),
     };
+
+    if std::env::var_os("OMNI_TIME_TYPST").is_some() {
+        println!("compile took {:?}", exec_time.elapsed());
+    }
 
     if !output.status.success() {
         if silent {

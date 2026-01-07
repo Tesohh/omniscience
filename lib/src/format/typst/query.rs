@@ -73,6 +73,8 @@ where
         Format::Html => command.args(["--target", "html", "--features", "html"]),
     };
 
+    let exec_time = std::time::Instant::now();
+
     let output = match command.output() {
         Ok(o) => o,
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
@@ -80,6 +82,10 @@ where
         }
         Err(err) => return Err(err.into()),
     };
+
+    if std::env::var_os("OMNI_TIME_TYPST").is_some() {
+        println!("query took {:?}", exec_time.elapsed());
+    }
 
     if !output.status.success() {
         if params.silent {

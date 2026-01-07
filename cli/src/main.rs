@@ -1,4 +1,5 @@
 pub mod args;
+pub mod build;
 pub mod init;
 pub mod new;
 pub mod pretty;
@@ -27,6 +28,10 @@ fn main() -> miette::Result<()> {
         args::Subcommand::Track(cmd) => {
             let (root, config) = read_config(&cwd)?;
             track::track(&root, &config, cmd)?
+        }
+        args::Subcommand::Build(cmd) => {
+            let (root, config) = read_config(&cwd)?;
+            build::build(&root, &config, cmd)?
         }
     }
     Ok(())

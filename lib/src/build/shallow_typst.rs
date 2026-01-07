@@ -1,9 +1,12 @@
 use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::{
-    build::shallow::{Frontmatter, ShallowError},
-    config::{self, Config},
-    format::{src_to_build_path, typst},
+    build::{
+        compile::compile_typst,
+        shallow::{Frontmatter, ShallowError},
+    },
+    config::Config,
+    format::typst,
     link, node,
 };
 
@@ -104,30 +107,7 @@ pub fn shallow_typst(
 
     // compile to html and pdf
     if compile {
-        let out_html = src_to_build_path(&root, my_path_canon, "html")
-            .expect("both paths should be canonical");
-
-        let mut out_pdf = out_html.clone();
-        out_pdf.set_extension("pdf");
-
-        if let Some(parent) = out_html.parent()
-            && !std::fs::exists(parent)?
-        {
-            std::fs::create_dir_all(parent)?;
-        }
-
-        match config.typst.output_format {
-            config::TypstOutputFormat::Html => {
-                typst::compile(&root, my_path_canon, out_html, typst::Format::Html, true)?;
-            }
-            config::TypstOutputFormat::Pdf => {
-                typst::compile(&root, my_path_canon, out_pdf, typst::Format::Pdf, true)?;
-            }
-            config::TypstOutputFormat::HtmlAndPdf => {
-                typst::compile(&root, my_path_canon, out_html, typst::Format::Html, true)?;
-                typst::compile(&root, my_path_canon, out_pdf, typst::Format::Pdf, true)?;
-            }
-        };
+        compile_typst(root, my_path_canon, config)?;
     };
 
     Ok(())
