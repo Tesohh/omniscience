@@ -6,6 +6,7 @@
   title: "",
   tags: (),
   names: (),
+  private: true,
   body,
 ) = {
   let nodes_toml = read("/build/nodes.toml", encoding: none)
@@ -23,6 +24,7 @@
     title: title,
     tags: tags,
     names: names,
+    private: private,
   )) <omni-frontmatter>]
 
   show ref: it => {

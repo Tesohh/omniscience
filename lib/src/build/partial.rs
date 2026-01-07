@@ -144,6 +144,7 @@ mod tests {
                     title: "Vector".into(),
                     names: vec!["vector".into()],
                     tags: vec![],
+                    private: false,
                 },
                 Node {
                     id: "id2".into(),
@@ -152,6 +153,7 @@ mod tests {
                     title: "Gaussian Elimination".into(),
                     names: vec!["gem".into()],
                     tags: vec![],
+                    private: false,
                 },
             ],
         };
@@ -177,7 +179,8 @@ mod tests {
         #metadata((
             title: "Vector",
             tags: (),
-            names: ("vector",)
+            names: ("vector",),
+            private: false
         )) <omni-frontmatter>
 
         #metadata((
@@ -193,7 +196,8 @@ mod tests {
         #metadata((
             title: "Gaussian Elimination",
             tags: (),
-            names: ("gem",)
+            names: ("gem",),
+            private: false
         )) <omni-frontmatter>
 
         #metadata((
@@ -209,7 +213,8 @@ mod tests {
         #metadata((
             title: "Matrix",
             tags: ("linalg", "matrix", "linear"),
-            names: ("matrix", "matrices")
+            names: ("matrix", "matrices"),
+            private: false
         )) <omni-frontmatter>
         
         = Top
@@ -239,6 +244,7 @@ mod tests {
                     title: "Vector".into(),
                     names: vec!["vector".into()],
                     tags: vec![],
+                    private: false,
                 },
                 Node {
                     id: "id2".into(),
@@ -247,6 +253,7 @@ mod tests {
                     title: "Gaussian Elimination".into(),
                     names: vec!["gem".into()],
                     tags: vec![],
+                    private: false,
                 },
                 Node {
                     id: file.id,
@@ -255,6 +262,7 @@ mod tests {
                     title: "Matrix".into(),
                     names: vec!["matrix".into(), "matrices".into()],
                     tags: vec!["linalg".into(), "matrix".into(), "linear".into()],
+                    private: false,
                 }
             ]
         );

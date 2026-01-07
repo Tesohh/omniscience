@@ -53,35 +53,6 @@ pub struct File {
     pub path: Utf8PathBuf,
 }
 
-impl File {
-    pub fn into_node(
-        self,
-        title: String,
-        names: Vec<String>,
-        tags: Vec<String>,
-    ) -> Result<Node, std::io::Error> {
-        Ok(Node {
-            id: self.id,
-            path: self.path.canonicalize_utf8()?,
-            kind: NodeKind::File,
-            title,
-            names,
-            tags,
-        })
-    }
-
-    pub fn into_node_barebones(self) -> Result<Node, std::io::Error> {
-        Ok(Node {
-            id: self.id,
-            path: self.path.canonicalize_utf8()?,
-            kind: NodeKind::File,
-            title: String::from(""),
-            names: vec![],
-            tags: vec![],
-        })
-    }
-}
-
 /// the nodes database found in `nodes.toml`
 /// this is **NOT** the ultimate source of truth for nodes.
 /// it's just the "user facing" nodes database.
@@ -112,6 +83,8 @@ pub struct Node {
     pub names: Vec<String>,
     #[serde(default)]
     pub tags: Vec<String>,
+    #[serde(default)]
+    pub private: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -234,6 +207,7 @@ mod tests {
                     title: "Vector".into(),
                     names: vec!["vector".into()],
                     tags: vec![],
+                    private: false,
                 },
                 Node {
                     id: "id2".into(),
@@ -242,6 +216,7 @@ mod tests {
                     title: "Borrowing".into(),
                     names: vec!["borrow-checker".into(), "borrow".into()],
                     tags: vec![],
+                    private: false,
                 },
             ],
         };
@@ -277,6 +252,7 @@ mod tests {
                     title: "Vector".into(),
                     names: vec!["vector".into()],
                     tags: vec![],
+                    private: false,
                 },
                 Node {
                     id: "id2".into(),
@@ -285,6 +261,7 @@ mod tests {
                     title: "Vector".into(),
                     names: vec!["vector".into()],
                     tags: vec![],
+                    private: false,
                 },
             ],
         };
@@ -335,6 +312,7 @@ mod tests {
                     title: "Vector".into(),
                     names: vec!["vector".into()],
                     tags: vec![],
+                    private: false,
                 },
                 Node {
                     id: "id2".into(),
@@ -343,6 +321,7 @@ mod tests {
                     title: "Vector".into(),
                     names: vec!["vector".into()],
                     tags: vec![],
+                    private: false,
                 },
             ],
         };
@@ -417,7 +396,8 @@ mod tests {
                     kind: NodeKind::File,
                     title: "Matrix".into(),
                     names: vec!["matrix".into()],
-                    tags: vec!["programming".into()]
+                    tags: vec!["programming".into()],
+                    private: false,
                 },
                 Node {
                     id: Id("id2".into()),
@@ -425,7 +405,8 @@ mod tests {
                     kind: NodeKind::File,
                     title: "Proof by induction".into(),
                     names: vec!["proof-by-induction".into(), "induction".into()],
-                    tags: vec![]
+                    tags: vec![],
+                    private: false,
                 }
             ]
         )

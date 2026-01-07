@@ -87,6 +87,7 @@ pub fn shallow_typst(
                 title: frontmatter.title,
                 names: frontmatter.names,
                 tags: frontmatter.tags,
+                private: frontmatter.private,
             });
 
             &file.id

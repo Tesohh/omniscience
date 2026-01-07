@@ -163,6 +163,7 @@ mod tests {
                     title: "Vector".into(),
                     names: vec!["vector".into()],
                     tags: vec![],
+                    private: false,
                 },
                 node::Node {
                     id: "id2".into(),
@@ -171,6 +172,7 @@ mod tests {
                     title: "Vector".into(),
                     names: vec!["vector".into()],
                     tags: vec![],
+                    private: false,
                 },
             ],
         }

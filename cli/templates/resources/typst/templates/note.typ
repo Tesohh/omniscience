@@ -5,9 +5,10 @@
   title: "",
   tags: (),
   names: (),
+  private: true,
   body,
 ) = {
-  show: omni.with(title: title, tags: tags, names: names)
+  show: omni.with(title: title, tags: tags, names: names, private: private)
 
   // your custom template here
 

@@ -45,6 +45,7 @@ pub(super) struct Frontmatter {
     pub(super) title: String,
     pub(super) tags: Vec<String>,
     pub(super) names: Vec<String>,
+    pub(super) private: bool,
 }
 
 #[derive(Debug, Deserialize)]
@@ -101,6 +102,7 @@ mod tests {
                 title: "Vector".into(),
                 names: vec!["vector".into()],
                 tags: vec![],
+                private: false,
             }],
         };
 
@@ -119,7 +121,8 @@ mod tests {
         #metadata((
             title: "Matrix",
             tags: ("linalg", "matrix", "linear"),
-            names: ("matrix", "matrices")
+            names: ("matrix", "matrices"),
+            private: false
         )) <omni-frontmatter>
         
         #metadata((
@@ -157,6 +160,7 @@ mod tests {
                     title: "Vector".into(),
                     names: vec!["vector".into()],
                     tags: vec![],
+                    private: false,
                 },
                 Node {
                     id: file.id,
@@ -165,6 +169,7 @@ mod tests {
                     title: "Matrix".into(),
                     names: vec!["matrix".into(), "matrices".into()],
                     tags: vec!["linalg".into(), "matrix".into(), "linear".into()],
+                    private: false,
                 }
             ]
         );
@@ -207,6 +212,7 @@ mod tests {
                 title: "Vector".into(),
                 names: vec!["vector".into()],
                 tags: vec![],
+                private: false,
             }],
         };
         let mut links = link::Db { links: vec![] };

@@ -24,7 +24,8 @@ CLOSED: [2026-01-07 Wed 21:19]
 CLOSED: [2026-01-07 Wed 23:43]
 ** DONE make full build take less (eg. parallel compiles, incremental compiles...)
 CLOSED: [2026-01-07 Wed 23:43]
-** TODO use https://github.com/ParkMyCar/compact_str for IDs
+** DONE use https://github.com/ParkMyCar/compact_str for IDs
+CLOSED: [2026-01-07 Wed 23:54]
 * CLI
 ** DONE what to do with ~src~?
 CLOSED: [2026-01-04 Sun 13:25]
@@ -66,7 +67,8 @@ CLOSED: [2026-01-02 Fri 01:49]
   - assets/
     - <users static assets>
 ** TODO make it so that init templates are loaded and usable even when not in the rust project's directory. using include_dir or something
-** TODO the new command should perhaps also add it's new node to build/nodes.toml 
+** DONE the new command should perhaps also add it's new node to build/nodes.toml 
+CLOSED: [2026-01-07 Wed 23:54]
 and do a "partial build", to resolve some ghost links that might have existed to that node.
 partial build would also be useful for LSP later on.
 ** DONE fix all IDs ending in 01 
