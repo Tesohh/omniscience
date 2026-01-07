@@ -19,26 +19,50 @@ pub fn shallow_typst(
     file: &node::File,
     compile: bool,
 ) -> Result<(), ShallowError> {
-    // query the file to ask for omni-frontmatter
-    let frontmatter: Frontmatter = typst::query(
-        &root,
-        my_path_canon,
-        "<omni-frontmatter>",
-        &typst::QueryParams {
-            format: typst::Format::Html,
-            silent: true,
-            one: true,
-            field: Some("value"),
+    let frontmatter_query_params = &typst::QueryParams {
+        format: typst::Format::Html,
+        silent: true,
+        one: true,
+        field: Some("value"),
+    };
+
+    let new_links_query_params = &typst::QueryParams {
+        format: typst::Format::Html,
+        silent: true,
+        one: false,
+        field: Some("value"),
+    };
+
+    let root_as_ref = root.as_ref();
+    let (frontmatter, new_links) = rayon::join(
+        || {
+            typst::query(
+                root_as_ref,
+                my_path_canon,
+                "<omni-frontmatter>",
+                frontmatter_query_params,
+            )
+            .map_err(|err| match err {
+                typst::QueryError::TypstError(_, ref message)
+                    if message == "error: expected exactly one element, found 0\n" =>
+                {
+                    ShallowError::MissingFrontmatter
+                }
+                _ => err.into(),
+            })
         },
-    )
-    .map_err(|err| match err {
-        typst::QueryError::TypstError(_, ref message)
-            if message == "error: expected exactly one element, found 0\n" =>
-        {
-            ShallowError::MissingFrontmatter
-        }
-        _ => err.into(),
-    })?;
+        || {
+            typst::query(
+                root_as_ref,
+                my_path_canon,
+                "<omni-link>",
+                new_links_query_params,
+            )
+        },
+    );
+
+    let frontmatter: Frontmatter = frontmatter?;
+    let new_links: Vec<super::shallow::Link> = new_links?;
 
     // WARN: this assumes that paths in build/nodes.toml are already canonical and valid
     let maybe_node = nodes
@@ -68,19 +92,6 @@ pub fn shallow_typst(
             &file.id
         }
     };
-
-    // query the file to ask for omni-links
-    let new_links: Vec<super::shallow::Link> = typst::query(
-        &root,
-        my_path_canon,
-        "<omni-link>",
-        &typst::QueryParams {
-            format: typst::Format::Html,
-            silent: true,
-            one: false,
-            field: Some("value"),
-        },
-    )?;
 
     // remove all links from my_id
     links.links.retain(|l| &l.from != my_id);
