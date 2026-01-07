@@ -63,8 +63,14 @@ pub fn compile_typst(
             typst::compile(&root, &path, out_pdf, typst::Format::Pdf, true)?;
         }
         config::TypstOutputFormat::HtmlAndPdf => {
-            typst::compile(&root, &path, out_html, typst::Format::Html, true)?;
-            typst::compile(&root, &path, out_pdf, typst::Format::Pdf, true)?;
+            let root = root.as_ref();
+            let path = path.as_ref();
+            let (html_result, pdf_result) = rayon::join(
+                || typst::compile(root, path, out_html, typst::Format::Html, true),
+                || typst::compile(root, path, out_pdf, typst::Format::Pdf, true),
+            );
+            html_result?;
+            pdf_result?;
         }
     };
 

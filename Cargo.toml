@@ -17,3 +17,4 @@ toml = { version = "0.9.10" }
 camino = { version = "1.2.2", features = ["serde1"] }
 slug = { version = "0.1.6" }
 serde_json = { version = "1.0.148" }
+rayon = { version = "1.11" }
