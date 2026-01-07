@@ -89,15 +89,14 @@ pub fn build(
         }
         None => {
             for file in &user_db.files {
-                pretty::msg("partial", &file.path);
                 partial(&root, config, &mut nodes, &mut links, file, false)?
             }
 
             let root_as_ref = root.as_ref();
-            user_db.files.par_iter().try_for_each(|file| {
-                pretty::msg("compile", &file.path);
-                compile(root_as_ref, &file.path, config)
-            })?;
+            user_db
+                .files
+                .par_iter()
+                .try_for_each(|file| compile(root_as_ref, &file.path, config))?;
         }
     };
 
