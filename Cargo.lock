@@ -301,6 +301,7 @@ dependencies = [
  "miette",
  "omni",
  "owo-colors",
+ "rayon",
  "serde",
  "tera",
  "thiserror",

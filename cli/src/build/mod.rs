@@ -4,6 +4,7 @@ use omni::{
     config::Config,
     link, node,
 };
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 use crate::{args::BuildCommand, pretty};
 
@@ -92,10 +93,11 @@ pub fn build(
                 partial(&root, config, &mut nodes, &mut links, file, false)?
             }
 
-            for file in &user_db.files {
+            let root_as_ref = root.as_ref();
+            user_db.files.par_iter().try_for_each(|file| {
                 pretty::msg("compile", &file.path);
-                compile(&root, &file.path, config)?
-            }
+                compile(root_as_ref, &file.path, config)
+            })?;
         }
     };
 
