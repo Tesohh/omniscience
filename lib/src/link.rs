@@ -36,7 +36,7 @@ pub enum Location {
     HeadingPath(Vec<String>),
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Eq, Hash, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum FilePart {
     /// Matches one name under any directory recursively.

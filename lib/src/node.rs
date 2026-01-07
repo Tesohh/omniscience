@@ -7,7 +7,7 @@ use thiserror::Error;
 
 use crate::{config::Config, link, node};
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, Eq, Clone)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Eq, Clone, Hash)]
 pub struct Id(pub String);
 
 impl Id {
@@ -132,6 +132,9 @@ pub enum Error {
     #[diagnostic(help("add the file to the node database tracking it with TODO"))]
     UntrackedNode(Utf8PathBuf),
 
+    #[error("id `{0}` does not exist")]
+    IdNotFound(Id),
+
     #[error("node with name `{0}` not found")]
     NameNotFound(String),
 
@@ -154,6 +157,14 @@ impl Db {
             Ok(index) => Ok(&self.nodes[index]), // WARNING: this should never crash but you know...
             Err(_) => Err(Error::UntrackedNode(path.to_path_buf())),
         }
+    }
+
+    /// Finds a node from an id
+    pub fn find_from_id(&self, id: &Id, _: &Config) -> Result<&'_ Node, Error> {
+        self.nodes
+            .iter()
+            .find(|node| &node.id == id)
+            .ok_or(Error::IdNotFound(id.clone()))
     }
 
     /// Finds the id of a node from a FilePart

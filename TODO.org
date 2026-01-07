@@ -1,6 +1,7 @@
 * CORE
 ** TODO move tracking logic to core
-** TODO implement shallow builds
+** DONE implement shallow builds
+CLOSED: [2026-01-06 Tue 20:44]
 ** TODO implement partial builds
 ** DONE KILL consider using HashSet for build/nodes and build/links 
 CLOSED: [2026-01-06 Tue 13:46]
