@@ -39,7 +39,17 @@
     let heading_part = splits.at(1, default: "")
     let alias = ""
     if type(it.supplement) == content or type(it.supplement) == str {
-      alias = it.supplement
+      alias = it
+        .supplement
+        .children
+        .map(it => {
+          if it.has("text") {
+            it.text
+          } else {
+            " "
+          }
+        })
+        .join()
     }
 
     let res = str(wasm.parse_link(

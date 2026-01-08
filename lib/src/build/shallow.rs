@@ -45,11 +45,13 @@ pub(super) struct Frontmatter {
     pub(super) title: String,
     pub(super) tags: Vec<String>,
     pub(super) names: Vec<String>,
+    #[serde(default)]
     pub(super) private: bool,
 }
 
 #[derive(Debug, Deserialize)]
-pub(super) struct Link {
+pub(super) struct TypstLink {
+    #[allow(dead_code)] // TEMP:
     pub(super) content: String,
     pub(super) to: String,
     #[serde(default)]

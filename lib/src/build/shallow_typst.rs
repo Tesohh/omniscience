@@ -62,7 +62,7 @@ pub fn shallow_typst(
     );
 
     let frontmatter: Frontmatter = frontmatter?;
-    let new_links: Vec<super::shallow::Link> = new_links?;
+    let new_links: Vec<super::shallow::TypstLink> = new_links?;
 
     // WARN: this assumes that paths in build/nodes.toml are already canonical and valid
     let maybe_node = nodes

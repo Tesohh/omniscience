@@ -44,7 +44,7 @@ fn init(nodes_toml: &[u8], config_toml: &[u8]) -> Vec<u8> {
 /// `target`: url to link to or "ghost"
 /// `to`: id of target node or "ghost"
 #[wasm_func]
-fn parse_link(file_part: &[u8], _heading_part: &[u8], alias: &[u8]) -> Vec<u8> {
+fn parse_link(raw_file_part: &[u8], _raw_heading_part: &[u8], alias: &[u8]) -> Vec<u8> {
     let lock = STATE.lock();
     let state = match lock.as_ref() {
         Some(s) => s,
@@ -60,7 +60,7 @@ fn parse_link(file_part: &[u8], _heading_part: &[u8], alias: &[u8]) -> Vec<u8> {
     // return format!("{},ghost,ghost", String::from_utf8_lossy(file_part)).into_bytes();
 
     // create a FilePart from the raw dot separated one
-    let file_splits: Vec<_> = file_part.split(|c| *c == b'.').collect();
+    let file_splits: Vec<_> = raw_file_part.split(|c| *c == b'.').collect();
     let file_part = if file_splits.is_empty() {
         return b"err: empty file part".to_vec();
     } else if file_splits.len() == 1 {
@@ -90,18 +90,18 @@ fn parse_link(file_part: &[u8], _heading_part: &[u8], alias: &[u8]) -> Vec<u8> {
     match maybe_node {
         Some(node) => {
             let content = if alias.is_empty() {
-                "PLACEHOLDER..."
+                &node.title
             } else {
-                &String::from_utf8_lossy(alias)
+                &String::from_utf8_lossy(alias).to_string()
             };
 
             format!("{},{},{}", content, node.path, node.id.0).into_bytes()
         }
         None => {
             let content = if alias.is_empty() {
-                "PLACEHOLDER GHOST"
+                &format!("@{}", &String::from_utf8_lossy(raw_file_part))
             } else {
-                &String::from_utf8_lossy(alias)
+                &String::from_utf8_lossy(alias).to_string()
             };
 
             format!("{},ghost,ghost", content).into_bytes()

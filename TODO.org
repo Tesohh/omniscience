@@ -26,6 +26,12 @@ CLOSED: [2026-01-07 Wed 23:43]
 CLOSED: [2026-01-07 Wed 23:43]
 ** DONE use https://github.com/ParkMyCar/compact_str for IDs
 CLOSED: [2026-01-07 Wed 23:54]
+* TYPST PLUGIN
+** DONE make the links show the title of the node
+CLOSED: [2026-01-08 Thu 00:47]
+** DONE show something for ghost links
+CLOSED: [2026-01-08 Thu 00:47]
+** TODO make the links actually point to something (when we have SSG?)
 * CLI
 ** DONE what to do with ~src~?
 CLOSED: [2026-01-04 Sun 13:25]
@@ -76,7 +82,9 @@ CLOSED: [2026-01-04 Sun 22:44]
 ** DONE fix possible edge case where multiple nodes are created at once, adn they all have the same id
 CLOSED: [2026-01-04 Sun 22:44]
 ** TODO consider removing is_already_tracked from just_track and let callers sort it out
-** TODO Add a ~private~ property to nodes
+** DONE Add a ~private~ property to nodes
+CLOSED: [2026-01-08 Thu 00:07]
+
 * Tasks
 ** DONE Write a function to resolve any kind of link
 ** DONE test said function
