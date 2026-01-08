@@ -33,6 +33,18 @@ although everything will be made with neovim users (like me) in mind.
 
 More editor specific plugins may come in the (far) future.
 
+## mvp
+the mvp will contain the following:
+- [x] Basic typst support (with normal pdf rendering, no SSG)
+- [x] Basic CLI
+- [ ] Basic LSP features:
+    - [x] Update document content with a rope
+    - [ ] Link Completion
+    - [ ] Hover
+    - [ ] Link gd, grr
+    - [ ] Code actions:
+        - [ ] New (apply template, track, and run partial build)
+
 ## personal reasons
 i wanted to make this project as i am a hyper-configurer and have tried many different PKM systems,
 and sometimes i want to try new ones (or even formats that don't "have" a pkm ie. typst), 
