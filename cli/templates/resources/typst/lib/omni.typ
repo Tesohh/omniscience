@@ -38,18 +38,26 @@
     let file_part = splits.at(0).replace("omni.", "")
     let heading_part = splits.at(1, default: "")
     let alias = ""
-    if type(it.supplement) == content or type(it.supplement) == str {
-      alias = it
-        .supplement
-        .children
-        .map(it => {
-          if it.has("text") {
-            it.text
-          } else {
-            " "
-          }
-        })
-        .join()
+    if type(it.supplement) == content {
+      if it.supplement.has("text") {
+        alias = it.supplement.text
+      } else if it.supplement.has("children") {
+        alias = it
+          .supplement
+          .children
+          .map(it => {
+            if it.has("text") {
+              it.text
+            } else if it == [ ] {
+              " "
+            } else {
+              panic("alias can only contain plain text")
+            }
+          })
+          .join()
+      } else {
+        panic("alias can only contain plain text")
+      }
     }
 
     let res = str(wasm.parse_link(
