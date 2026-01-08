@@ -178,7 +178,8 @@ like ~omni mv linalg/matrix.typ math/matrix.typ~
 would first of all update ~nodes.toml~, and all links of form ~path.file~ to that node.
 The LSP would do the same thing. Check this out..
 [[https://github.com/folke/snacks.nvim/blob/main/docs/rename.md]]
-** TODO figure out how links are resolved
+** DONE figure out how links are resolved
+CLOSED: [2026-01-08 Thu 11:48]
 eg. Typst links are divided in four parts:
 1. ~@omni~ preamble
 2. ~.<filename>~ | ~.<path>.<filename>~ File
