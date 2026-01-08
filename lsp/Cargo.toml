@@ -6,6 +6,8 @@ edition = "2024"
 [dependencies]
 thiserror.workspace = true
 camino.workspace = true
+toml.workspace = true
+serde.workspace = true
 tokio = { version = "1.48.0", features = ["full"] } # TODO: reduce features
 tower-lsp-server = "0.23.0"
 omni = { path = "../lib" }

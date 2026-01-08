@@ -772,8 +772,10 @@ dependencies = [
  "log",
  "omni",
  "ropey",
+ "serde",
  "thiserror",
  "tokio",
+ "toml",
  "tower-lsp-server",
 ]
 

@@ -1,14 +1,18 @@
+use camino::{Utf8Path, Utf8PathBuf};
 use dashmap::DashMap;
+use omni::config::{self, find_project_root};
+use omni::{link, node};
 use tower_lsp_server::jsonrpc::Result;
 use tower_lsp_server::ls_types::*;
 use tower_lsp_server::{Client, LanguageServer};
 
-use crate::document;
+use crate::{document, project};
 
 #[derive(Debug)]
 pub struct Backend {
     client: Client,
     documents: DashMap<Uri, document::Document>,
+    projects: DashMap<Utf8PathBuf, project::Project>,
 }
 
 impl Backend {
@@ -16,6 +20,7 @@ impl Backend {
         Self {
             client,
             documents: DashMap::new(),
+            projects: DashMap::new(),
         }
     }
 
@@ -41,7 +46,7 @@ impl LanguageServer for Backend {
 
     async fn initialized(&self, _: InitializedParams) {
         self.client
-            .show_message(MessageType::INFO, "server initialized!")
+            .log_message(MessageType::INFO, "server initialized!")
             .await;
     }
 
@@ -65,9 +70,53 @@ impl LanguageServer for Backend {
 
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
         log::debug!("client did open {}", params.text_document.uri.as_str());
+
+        let maybe_root: Option<Utf8PathBuf> = {
+            let is_file = params.text_document.uri.scheme().as_str() == "file";
+
+            if is_file && let Some(path) = params.text_document.uri.to_file_path() {
+                let path = Utf8Path::from_path(&path).expect("path should always be valid utf8");
+
+                match find_project_root(path) {
+                    Ok(root) => {
+                        // load the project (if not already loaded)
+                        let mut project_ok = true;
+                        if !self.projects.contains_key(&root) {
+                            let project = project::Project::load_project(&root)
+                                .await
+                                .map_err(|err| log::error!("failed to load project: {}", err))
+                                .ok();
+
+                            if let Some(project) = project {
+                                self.projects.insert(root.clone(), project);
+                            } else {
+                                project_ok = false
+                            }
+                        }
+
+                        if project_ok { Some(root) } else { None }
+                    }
+                    Err(omni::config::Error::NoProjectRoot) => {
+                        log::warn!("opened file outside a project root");
+                        None
+                    }
+                    Err(err) => {
+                        log::error!("{}", err);
+                        None
+                    }
+                }
+            } else {
+                log::error!("got file with invalid uri: {:#?}", params.text_document.uri);
+                return;
+            }
+        };
+
+        log::debug!("maybe_root: {:?}", maybe_root);
+
         self.documents.insert(
             params.text_document.uri,
             document::Document {
+                project_root: maybe_root,
                 version: params.text_document.version,
                 language_id: params.text_document.language_id,
                 content: ropey::Rope::from(params.text_document.text),
@@ -94,7 +143,6 @@ impl LanguageServer for Backend {
 
                         doc.content.remove(start_idx..end_idx);
                         doc.content.insert(start_idx, &change.text);
-                        log::debug!("content is now {}", &doc.content);
                     });
             } else {
                 // we are using full changes, just replace the whole content
@@ -103,7 +151,6 @@ impl LanguageServer for Backend {
                     .and_modify(|doc| {
                         doc.version = params.text_document.version;
                         doc.content = ropey::Rope::from(change.text);
-                        log::debug!("content is now {}", &doc.content);
                     });
             }
         }

@@ -26,6 +26,22 @@ CLOSED: [2026-01-07 Wed 23:43]
 CLOSED: [2026-01-07 Wed 23:43]
 ** DONE use https://github.com/ParkMyCar/compact_str for IDs
 CLOSED: [2026-01-07 Wed 23:54]
+* LSP
+** DONE keep document synchronized
+CLOSED: [2026-01-08 Thu 18:33]
+** TODO when opening a file, find its root, and check if it has a project
+if it does, then load the project, and keep it in a dashmap.
+for files that DO NOT have a project associated, just ignore their requests.
+** TODO when loading a project, load all data associated with it (config, nodes, build/nodes, build/links)
+** TODO watch for changes on all omni related files, and in that case mutate the Project
+** TODO Add link completion
+** TODO Add Hover
+hovering over a link will show a preview of the referenced file.
+** TODO Add link go to definition
+** TODO Add code action to pretty much run new
+(apply template, track, and run partial build)
+** TODO Add link go to references 
+** TODO Listen to LSP file renames/moves
 * TYPST PLUGIN
 ** DONE make the links show the title of the node
 CLOSED: [2026-01-08 Thu 00:47]

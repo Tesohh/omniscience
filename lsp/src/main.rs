@@ -1,5 +1,6 @@
 pub mod backend;
 pub mod document;
+pub mod project;
 
 use std::path::Path;
 
@@ -13,10 +14,11 @@ async fn main() {
     let stdin = tokio::io::stdin();
     let stdout = tokio::io::stdout();
 
-    Ftail::new()
-        .single_file(Path::new(".logs/log.txt"), true, log::LevelFilter::Trace)
-        .init()
-        .unwrap();
+    if std::fs::exists(".logs").unwrap() {
+        let _ = Ftail::new()
+            .single_file(Path::new(".logs/log.txt"), true, log::LevelFilter::Trace)
+            .init();
+    }
 
     let (service, socket) = LspService::new(Backend::new);
     Server::new(stdin, stdout, socket).serve(service).await;
