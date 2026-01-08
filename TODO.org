@@ -29,10 +29,12 @@ CLOSED: [2026-01-07 Wed 23:54]
 * LSP
 ** DONE keep document synchronized
 CLOSED: [2026-01-08 Thu 18:33]
-** TODO when opening a file, find its root, and check if it has a project
+** DONE when opening a file, find its root, and check if it has a project
+CLOSED: [2026-01-08 Thu 21:30]
 if it does, then load the project, and keep it in a dashmap.
 for files that DO NOT have a project associated, just ignore their requests.
-** TODO when loading a project, load all data associated with it (config, nodes, build/nodes, build/links)
+** DONE when loading a project, load all data associated with it (config, nodes, build/nodes, build/links)
+CLOSED: [2026-01-08 Thu 21:30]
 ** TODO watch for changes on all omni related files, and in that case mutate the Project
 ** TODO Add link completion
 ** TODO Add Hover

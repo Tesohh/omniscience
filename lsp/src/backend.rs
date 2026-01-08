@@ -1,7 +1,6 @@
 use camino::{Utf8Path, Utf8PathBuf};
 use dashmap::DashMap;
-use omni::config::{self, find_project_root};
-use omni::{link, node};
+use omni::config::find_project_root;
 use tower_lsp_server::jsonrpc::Result;
 use tower_lsp_server::ls_types::*;
 use tower_lsp_server::{Client, LanguageServer};
@@ -33,6 +32,43 @@ impl Backend {
             )),
             ..Default::default()
         }
+    }
+
+    async fn register_project(
+        &self,
+        root: &Utf8PathBuf,
+    ) -> std::result::Result<(), project::LoadError> {
+        if !self.projects.contains_key(root) {
+            let project = project::Project::load_project(root).await?;
+            self.projects.insert(root.clone(), project);
+        }
+        Ok(())
+    }
+
+    fn find_root_from_uri(uri: &Uri) -> Option<Utf8PathBuf> {
+        let is_file = uri.scheme().as_str() == "file";
+
+        if !is_file {
+            log::error!("got file with invalid uri: {:#?}", uri);
+            return None;
+        }
+
+        if let Some(path) = uri.to_file_path() {
+            let path = Utf8Path::from_path(&path).expect("path should always be valid utf8");
+            match find_project_root(path) {
+                Ok(root) => return Some(root),
+                Err(omni::config::Error::NoProjectRoot) => {
+                    log::warn!("opened file outside a project root");
+                    return None;
+                }
+                Err(err) => {
+                    log::error!("{}", err);
+                    return None;
+                }
+            }
+        }
+
+        None
     }
 }
 
@@ -71,44 +107,12 @@ impl LanguageServer for Backend {
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
         log::debug!("client did open {}", params.text_document.uri.as_str());
 
-        let maybe_root: Option<Utf8PathBuf> = {
-            let is_file = params.text_document.uri.scheme().as_str() == "file";
-
-            if is_file && let Some(path) = params.text_document.uri.to_file_path() {
-                let path = Utf8Path::from_path(&path).expect("path should always be valid utf8");
-
-                match find_project_root(path) {
-                    Ok(root) => {
-                        // load the project (if not already loaded)
-                        let mut project_ok = true;
-                        if !self.projects.contains_key(&root) {
-                            let project = project::Project::load_project(&root)
-                                .await
-                                .map_err(|err| log::error!("failed to load project: {}", err))
-                                .ok();
-
-                            if let Some(project) = project {
-                                self.projects.insert(root.clone(), project);
-                            } else {
-                                project_ok = false
-                            }
-                        }
-
-                        if project_ok { Some(root) } else { None }
-                    }
-                    Err(omni::config::Error::NoProjectRoot) => {
-                        log::warn!("opened file outside a project root");
-                        None
-                    }
-                    Err(err) => {
-                        log::error!("{}", err);
-                        None
-                    }
-                }
-            } else {
-                log::error!("got file with invalid uri: {:#?}", params.text_document.uri);
-                return;
-            }
+        let maybe_root = Self::find_root_from_uri(&params.text_document.uri);
+        if let Some(root) = &maybe_root {
+            let _ = self
+                .register_project(root)
+                .await
+                .map_err(|err| log::error!("err while registering project {}", err));
         };
 
         log::debug!("maybe_root: {:?}", maybe_root);
