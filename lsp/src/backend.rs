@@ -1,25 +1,41 @@
+use std::error::Error;
+use std::num::ParseIntError;
+use std::sync::Arc;
+
 use camino::{Utf8Path, Utf8PathBuf};
 use dashmap::DashMap;
+use notify::Watcher;
 use omni::config::find_project_root;
+use thiserror::Error;
 use tower_lsp_server::jsonrpc::Result;
 use tower_lsp_server::ls_types::*;
 use tower_lsp_server::{Client, LanguageServer};
 
+use crate::err_log_ext::ErrLogExt;
 use crate::{document, project};
 
 #[derive(Debug)]
 pub struct Backend {
     client: Client,
-    documents: DashMap<Uri, document::Document>,
-    projects: DashMap<Utf8PathBuf, project::Project>,
+    documents: Arc<DashMap<Uri, document::Document>>,
+    projects: Arc<DashMap<Utf8PathBuf, project::Project>>,
+}
+
+#[derive(Error, Debug)]
+enum ProjectRegisterError {
+    #[error(transparent)]
+    LoadError(#[from] project::LoadError),
+
+    #[error(transparent)]
+    NotifyError(#[from] notify::Error),
 }
 
 impl Backend {
     pub fn new(client: Client) -> Self {
         Self {
             client,
-            documents: DashMap::new(),
-            projects: DashMap::new(),
+            documents: Arc::new(DashMap::new()),
+            projects: Arc::new(DashMap::new()),
         }
     }
 
@@ -37,11 +53,27 @@ impl Backend {
     async fn register_project(
         &self,
         root: &Utf8PathBuf,
-    ) -> std::result::Result<(), project::LoadError> {
+    ) -> std::result::Result<(), ProjectRegisterError> {
         if !self.projects.contains_key(root) {
             let project = project::Project::load_project(root).await?;
             self.projects.insert(root.clone(), project);
+
+            // if we inserted a new project then start watching it
+
+            let root_clone = root.clone();
+            let projects_clone = Arc::clone(&self.projects);
+
+            tokio::spawn(async move {
+                // WARNING: watching files might cause a data race
+                // if we have a mutated project,
+                // and in the meantime a CLI edits the project or something.
+
+                let _ = project::start_watching_project(root_clone, projects_clone)
+                    .await
+                    .log_err("cannot watch project");
+            });
         }
+
         Ok(())
     }
 
