@@ -3,6 +3,8 @@ use itertools::Itertools;
 use omni::{config::Config, node, omni_path::OmniPath};
 use thiserror::Error;
 
+use crate::err_log_ext::ErrLogExt;
+
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct LinkEntry {
     pub omni_path: OmniPath,

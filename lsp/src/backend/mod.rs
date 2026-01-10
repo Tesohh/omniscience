@@ -30,7 +30,10 @@ impl Backend {
     pub fn capabilities() -> ServerCapabilities {
         ServerCapabilities {
             hover_provider: Some(HoverProviderCapability::Simple(true)),
-            completion_provider: Some(CompletionOptions::default()),
+            completion_provider: Some(CompletionOptions {
+                trigger_characters: Some(vec!["@".into()]),
+                ..Default::default()
+            }),
             text_document_sync: Some(TextDocumentSyncCapability::Kind(
                 TextDocumentSyncKind::INCREMENTAL,
             )),

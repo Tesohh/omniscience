@@ -9,6 +9,7 @@ use notify::{
 use omni::{link, node};
 use serde::Deserialize;
 use thiserror::Error;
+use tower_lsp_server::{Client, ls_types::MessageType};
 
 use crate::err_log_ext::ErrLogExt;
 
@@ -98,6 +99,7 @@ pub enum WatchError {
 pub async fn start_watching_project(
     root: Utf8PathBuf,
     projects: Arc<DashMap<Utf8PathBuf, Project>>,
+    client: Client,
 ) -> Result<(), WatchError> {
     let (tx, mut rx) = tokio::sync::mpsc::channel::<notify::Result<notify::Event>>(32);
 
@@ -164,6 +166,10 @@ pub async fn start_watching_project(
                     };
                     project.links = links;
                 };
+
+                client
+                    .show_message(MessageType::INFO, "reloaded project")
+                    .await;
             }
         }
     }

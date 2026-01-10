@@ -26,6 +26,7 @@ CLOSED: [2026-01-07 Wed 23:43]
 CLOSED: [2026-01-07 Wed 23:43]
 ** DONE use https://github.com/ParkMyCar/compact_str for IDs
 CLOSED: [2026-01-07 Wed 23:54]
+** TODO remove dangling nodes (exist in build but not in user db) BEFORE a full build
 * LSP
 ** DONE keep document synchronized
 CLOSED: [2026-01-08 Thu 18:33]
@@ -107,6 +108,8 @@ CLOSED: [2026-01-04 Sun 22:44]
 CLOSED: [2026-01-08 Thu 00:07]
 ** TODO install shell completions with clap completions
 
+** TODO add a ~clean~ command that resets ~build/~
+** TODO add a ~--clean~ flag to ~build~
 * Tasks
 ** DONE Write a function to resolve any kind of link
 ** DONE test said function

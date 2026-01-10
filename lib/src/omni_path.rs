@@ -155,6 +155,15 @@ impl OmniPath {
     pub fn try_from_path(path: impl AsRef<Utf8Path>) -> Result<Self, Error> {
         Self::try_from(path.as_ref())
     }
+
+    pub fn as_typst_style(&self) -> String {
+        if self.path.is_empty() {
+            format!("omni.{}", self.name)
+        } else {
+            let path_part = self.path.join(".");
+            format!("omni.{}.{}", path_part, self.name)
+        }
+    }
 }
 
 #[cfg(test)]

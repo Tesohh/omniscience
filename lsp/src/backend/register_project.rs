@@ -29,13 +29,14 @@ impl Backend {
 
             let root_clone = root.clone();
             let projects_clone = Arc::clone(&self.projects);
+            let client_clone = self.client.clone();
 
             tokio::spawn(async move {
                 // WARNING: watching files might cause a data race
                 // if we have a mutated project,
                 // and in the meantime a CLI edits the project or something.
 
-                let _ = project::start_watching_project(root_clone, projects_clone)
+                let _ = project::start_watching_project(root_clone, projects_clone, client_clone)
                     .await
                     .log_err("cannot watch project");
             });

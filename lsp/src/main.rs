@@ -1,5 +1,6 @@
 pub mod backend;
 pub mod document;
+pub mod err_json_rpc_ext;
 mod err_log_ext;
 pub mod links;
 pub mod project;

@@ -10,7 +10,7 @@ use crate::{args::BuildCommand, pretty};
 
 #[derive(thiserror::Error, miette::Diagnostic, Debug)]
 pub enum Error {
-    #[error(transparent)]
+    #[error("aiosjdioas {0}")]
     IoError(#[from] std::io::Error),
 
     #[error(transparent)]
