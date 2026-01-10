@@ -1,5 +1,3 @@
-use std::error::Error;
-use std::num::ParseIntError;
 use std::sync::Arc;
 
 use camino::{Utf8Path, Utf8PathBuf};
@@ -81,7 +79,7 @@ impl Backend {
         let is_file = uri.scheme().as_str() == "file";
 
         if !is_file {
-            log::error!("got file with invalid uri: {:#?}", uri);
+            tracing::error!("got file with invalid uri: {:#?}", uri);
             return None;
         }
 
@@ -90,11 +88,11 @@ impl Backend {
             match find_project_root(path) {
                 Ok(root) => return Some(root),
                 Err(omni::config::Error::NoProjectRoot) => {
-                    log::warn!("opened file outside a project root");
+                    tracing::warn!("opened file outside a project root");
                     return None;
                 }
                 Err(err) => {
-                    log::error!("{}", err);
+                    tracing::error!("{}", err);
                     return None;
                 }
             }
@@ -105,6 +103,7 @@ impl Backend {
 }
 
 impl LanguageServer for Backend {
+    #[tracing::instrument]
     async fn initialize(&self, _: InitializeParams) -> Result<InitializeResult> {
         Ok(InitializeResult {
             capabilities: Self::capabilities(),
@@ -112,16 +111,19 @@ impl LanguageServer for Backend {
         })
     }
 
+    #[tracing::instrument]
     async fn initialized(&self, _: InitializedParams) {
         self.client
             .log_message(MessageType::INFO, "server initialized!")
             .await;
     }
 
+    #[tracing::instrument]
     async fn shutdown(&self) -> Result<()> {
         Ok(())
     }
 
+    #[tracing::instrument]
     async fn completion(&self, _: CompletionParams) -> Result<Option<CompletionResponse>> {
         Ok(Some(CompletionResponse::Array(vec![
             CompletionItem::new_simple("Hello".to_string(), "Some detail".to_string()),
@@ -129,6 +131,7 @@ impl LanguageServer for Backend {
         ])))
     }
 
+    #[tracing::instrument]
     async fn hover(&self, _: HoverParams) -> Result<Option<Hover>> {
         Ok(Some(Hover {
             contents: HoverContents::Scalar(MarkedString::String("You're hovering!".to_string())),
@@ -136,18 +139,19 @@ impl LanguageServer for Backend {
         }))
     }
 
+    #[tracing::instrument]
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
-        log::debug!("client did open {}", params.text_document.uri.as_str());
+        tracing::debug!("client did open {}", params.text_document.uri.as_str());
 
         let maybe_root = Self::find_root_from_uri(&params.text_document.uri);
         if let Some(root) = &maybe_root {
             let _ = self
                 .register_project(root)
                 .await
-                .map_err(|err| log::error!("err while registering project {}", err));
+                .map_err(|err| tracing::error!("err while registering project {}", err));
         };
 
-        log::debug!("maybe_root: {:?}", maybe_root);
+        tracing::debug!("maybe_root: {:?}", maybe_root);
 
         self.documents.insert(
             params.text_document.uri,
@@ -160,8 +164,9 @@ impl LanguageServer for Backend {
         );
     }
 
+    #[tracing::instrument]
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
-        log::debug!("client did change {}", params.text_document.uri.as_str());
+        tracing::debug!("client did change {}", params.text_document.uri.as_str());
 
         for change in params.content_changes {
             if let Some(range) = change.range {

@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{fmt::Debug, sync::Arc};
 
 use camino::{Utf8Path, Utf8PathBuf};
 use dashmap::DashMap;
@@ -34,21 +34,24 @@ pub enum LoadError {
 }
 
 impl Project {
-    pub async fn read_and_parse_file<T>(file: impl AsRef<Utf8Path>) -> Result<T, LoadError>
+    #[tracing::instrument]
+    pub async fn read_and_parse_file<T, F>(file: F) -> Result<T, LoadError>
     where
         T: for<'a> Deserialize<'a>,
+        F: AsRef<Utf8Path> + Debug,
     {
         let db_file = tokio::fs::read(file.as_ref()).await?;
         Ok(toml::from_slice(&db_file)?)
     }
 
+    #[tracing::instrument]
     pub async fn load_project(root: &Utf8PathBuf) -> Result<Self, LoadError> {
         Ok(Self {
             config: Self::read_and_parse_file(root.join("omni.toml")).await?,
             user_nodes: match Self::read_and_parse_file(root.join("nodes.toml")).await {
                 Ok(v) => v,
                 Err(err) => {
-                    log::error!(
+                    tracing::error!(
                         "error while loading {}. err: {}",
                         root.join("nodes.toml"),
                         err
@@ -59,7 +62,7 @@ impl Project {
             nodes: match Self::read_and_parse_file(root.join("build/nodes.toml")).await {
                 Ok(v) => v,
                 Err(err) => {
-                    log::error!(
+                    tracing::error!(
                         "error while loading {}. err: {}",
                         root.join("build/nodes.toml"),
                         err
@@ -70,7 +73,7 @@ impl Project {
             links: match Self::read_and_parse_file(root.join("build/links.toml")).await {
                 Ok(v) => v,
                 Err(err) => {
-                    log::error!(
+                    tracing::error!(
                         "error while loading {}. err: {}",
                         root.join("build/links.toml"),
                         err
@@ -91,6 +94,7 @@ pub enum WatchError {
     LoadError(#[from] LoadError),
 }
 
+#[tracing::instrument]
 pub async fn start_watching_project(
     root: Utf8PathBuf,
     projects: Arc<DashMap<Utf8PathBuf, Project>>,
@@ -124,7 +128,7 @@ pub async fn start_watching_project(
                     .get_mut(&root)
                     .expect("project should always exist");
 
-                log::trace!("reloading {}", path.display());
+                tracing::info!("reloading {}", path.display());
 
                 // TODO: cleanup
                 if path == root.join_os("omni.toml") {

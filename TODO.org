@@ -35,12 +35,15 @@ if it does, then load the project, and keep it in a dashmap.
 for files that DO NOT have a project associated, just ignore their requests.
 ** DONE when loading a project, load all data associated with it (config, nodes, build/nodes, build/links)
 CLOSED: [2026-01-08 Thu 21:30]
-** TODO watch for changes on all omni related files, and in that case mutate the Project
+** DONE watch for changes on all omni related files, and in that case mutate the Project
+CLOSED: [2026-01-09 Fri 20:57]
+** TODO switch to tracing instead of log
+** TODO add Real Lsp Logging
 ** TODO Add link completion
 ** TODO Add Hover
 hovering over a link will show a preview of the referenced file.
 ** TODO Add link go to definition
-** TODO Add code action to pretty much run new
+** TODO Add code action to pretty much run ~new~
 (apply template, track, and run partial build)
 ** TODO Add link go to references 
 ** TODO Listen to LSP file renames/moves

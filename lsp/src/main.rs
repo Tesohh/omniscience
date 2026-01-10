@@ -1,12 +1,10 @@
 pub mod backend;
 pub mod document;
 mod err_log_ext;
+mod lsp_tracing_sub;
 pub mod project;
-
-use std::path::Path;
-
-use ftail::Ftail;
 use tower_lsp_server::{LspService, Server};
+use tracing_subscriber::{Layer, filter, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::backend::Backend;
 
@@ -15,12 +13,12 @@ async fn main() {
     let stdin = tokio::io::stdin();
     let stdout = tokio::io::stdout();
 
-    if std::fs::exists(".logs").unwrap() {
-        let _ = Ftail::new()
-            .single_file(Path::new(".logs/log.txt"), true, log::LevelFilter::Trace)
-            .init();
-    }
+    let stderr_layer = tracing_subscriber::fmt::layer()
+        .with_writer(std::io::stderr)
+        .with_ansi(false)
+        .with_filter(filter::LevelFilter::DEBUG);
+    tracing_subscriber::registry().with(stderr_layer).init();
 
-    let (service, socket) = LspService::new(Backend::new);
+    let (service, socket) = LspService::new(|client| Backend::new(client));
     Server::new(stdin, stdout, socket).serve(service).await;
 }
