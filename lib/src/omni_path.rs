@@ -304,12 +304,14 @@ mod tests {
 
     #[test]
     fn test_tryrealias() {
-        let mut op = OmniPath::new(vec!["cs".into(), "linear-algebra".into()], "vector".into());
+        let mut op = OmniPath::new(vec!["cs".into(), "linear-algebra".into()], "vector".into())
+            .force_unalias();
         let done = op.try_realias("linalg", "cs/linear-algebra");
         assert!(done);
         assert_eq!(op.path, ["linalg"]);
 
-        let mut op = OmniPath::new(vec!["cs".into(), "linear-algebra".into()], "vector".into());
+        let mut op = OmniPath::new(vec!["cs".into(), "linear-algebra".into()], "vector".into())
+            .force_unalias();
         let done = op.try_realias("rust", "cs/rust");
         assert!(!done);
         assert_eq!(op.path, ["cs", "linear-algebra"]);

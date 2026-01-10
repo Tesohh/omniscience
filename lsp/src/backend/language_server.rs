@@ -8,7 +8,7 @@ use crate::err_json_rpc_ext::ResultToJsonRpcExt;
 use crate::err_log_ext::ErrLogExt;
 
 impl LanguageServer for Backend {
-    #[tracing::instrument]
+    #[tracing::instrument(skip_all)]
     async fn initialize(&self, _: InitializeParams) -> Result<InitializeResult> {
         Ok(InitializeResult {
             capabilities: Self::capabilities(),
@@ -16,19 +16,19 @@ impl LanguageServer for Backend {
         })
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip_all)]
     async fn initialized(&self, _: InitializedParams) {
         self.client
             .log_message(MessageType::INFO, "server initialized!")
             .await;
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip_all)]
     async fn shutdown(&self) -> Result<()> {
         Ok(())
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip_all)]
     async fn completion(&self, params: CompletionParams) -> Result<Option<CompletionResponse>> {
         if let Some(context) = &params.context {
             match context.trigger_kind {
@@ -84,7 +84,7 @@ impl LanguageServer for Backend {
         }
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip_all)]
     async fn hover(&self, _: HoverParams) -> Result<Option<Hover>> {
         Ok(Some(Hover {
             contents: HoverContents::Scalar(MarkedString::String("You're hovering!".to_string())),
@@ -92,7 +92,7 @@ impl LanguageServer for Backend {
         }))
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip_all)]
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
         tracing::debug!("client did open {}", params.text_document.uri.as_str());
 
@@ -117,7 +117,7 @@ impl LanguageServer for Backend {
         );
     }
 
-    #[tracing::instrument]
+    #[tracing::instrument(skip_all)]
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
         tracing::debug!("client did change {}", params.text_document.uri.as_str());
 

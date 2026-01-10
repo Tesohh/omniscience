@@ -3,12 +3,11 @@ use itertools::Itertools;
 use omni::{config::Config, node, omni_path::OmniPath};
 use thiserror::Error;
 
-use crate::err_log_ext::ErrLogExt;
-
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct LinkEntry {
     pub omni_path: OmniPath,
     pub true_path: Utf8PathBuf,
+    valid: bool,
 }
 
 #[derive(Error, Debug)]
@@ -31,6 +30,7 @@ pub fn get_possible_links(
             links.push(LinkEntry {
                 omni_path,
                 true_path: node.path.clone(), // PERF:
+                valid: true,
             })
         }
     }
@@ -40,7 +40,9 @@ pub fn get_possible_links(
 
     // grind out dedups
     loop {
-        if !dedup(&root, config, &mut links)? {
+        let res = dedup(&root, config, &mut links)?;
+        links.retain(|l| l.valid);
+        if !res {
             break;
         }
     }
@@ -86,17 +88,28 @@ fn dedup(
                 prefix.push(notes_prefix);
             }
 
-            let path = link
-                .true_path
-                .strip_prefix(&prefix)
-                .map_err(|_| DedupError::NodeOutsideProject)?;
+            let path = match link.true_path.strip_prefix(&prefix) {
+                Ok(v) => v,
+                Err(_) => {
+                    link.valid = false;
+                    tracing::warn!("removing problematic link entry {link:?}");
+                    continue;
+                }
+            };
 
             let components = path.components().collect_vec();
-            let new_component = components
+            let new_component = match components
                 .iter()
                 .take(components.len() - 1)
                 .nth(link.omni_path.path.len())
-                .ok_or(DedupError::CannotGoFurther)?;
+            {
+                Some(v) => v,
+                None => {
+                    link.valid = false;
+                    tracing::warn!("removing problematic link entry {link:?}");
+                    continue;
+                }
+            };
 
             link.omni_path.path.push(new_component.to_string());
             edited = true;
@@ -158,16 +171,78 @@ mod tests {
             [
                 LinkEntry {
                     omni_path: OmniPath::new(vec![], "matrix".into()).force_unalias(),
-                    true_path: "/Users/me/docs/vault/cs/linear-algebra/matrix.typ".into()
+                    true_path: "/Users/me/docs/vault/cs/linear-algebra/matrix.typ".into(),
+                    valid: true,
                 },
                 LinkEntry {
                     omni_path: OmniPath::new(vec!["linalg".into()], "vector".into()),
-                    true_path: "/Users/me/docs/vault/cs/linear-algebra/vector.typ".into()
+                    true_path: "/Users/me/docs/vault/cs/linear-algebra/vector.typ".into(),
+                    valid: true,
                 },
                 LinkEntry {
                     omni_path: OmniPath::new(vec!["cs".into(), "rust".into()], "vector".into())
                         .force_unalias(),
-                    true_path: "/Users/me/docs/vault/cs/rust/vector.typ".into()
+                    true_path: "/Users/me/docs/vault/cs/rust/vector.typ".into(),
+                    valid: true,
+                },
+            ]
+        );
+    }
+
+    #[test]
+    fn test_get_possible_links_bad_dup() {
+        let nodes = node::Db {
+            nodes: vec![
+                node::Node {
+                    id: "id1".into(),
+                    path: "/Users/me/docs/vault/cs/linear-algebra/vector.typ".into(),
+                    kind: node::NodeKind::File,
+                    title: "Vector".into(),
+                    names: vec!["vector".into()],
+                    tags: vec![],
+                    private: false,
+                },
+                node::Node {
+                    id: "id2".into(),
+                    path: "/Users/me/docs/vault/vector.typ".into(),
+                    kind: node::NodeKind::File,
+                    title: "vector".into(),
+                    names: vec!["vector".into()],
+                    tags: vec![],
+                    private: false,
+                },
+                node::Node {
+                    id: "id3".into(),
+                    path: "/Users/me/docs/vault/cs/rust/vector.typ".into(),
+                    kind: node::NodeKind::File,
+                    title: "Vector".into(),
+                    names: vec!["vector".into()],
+                    tags: vec![],
+                    private: false,
+                },
+            ],
+        };
+
+        let root = "/Users/me/docs/vault";
+
+        let config = Config {
+            dir_aliases: HashMap::from([("linalg".into(), "cs/linear-algebra".into())]),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            get_possible_links(root, &config, &nodes).unwrap(),
+            [
+                LinkEntry {
+                    omni_path: OmniPath::new(vec!["linalg".into()], "vector".into()),
+                    true_path: "/Users/me/docs/vault/cs/linear-algebra/vector.typ".into(),
+                    valid: true
+                },
+                LinkEntry {
+                    omni_path: OmniPath::new(vec!["cs".into(), "rust".into()], "vector".into())
+                        .force_unalias(),
+                    true_path: "/Users/me/docs/vault/cs/rust/vector.typ".into(),
+                    valid: true
                 },
             ]
         );
