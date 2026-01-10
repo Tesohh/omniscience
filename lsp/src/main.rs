@@ -1,7 +1,6 @@
 pub mod backend;
 pub mod document;
 mod err_log_ext;
-mod lsp_tracing_sub;
 pub mod project;
 use tower_lsp_server::{LspService, Server};
 use tracing_subscriber::{Layer, filter, layer::SubscriberExt, util::SubscriberInitExt};
