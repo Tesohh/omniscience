@@ -63,13 +63,13 @@ pub struct UserDb {
     pub files: Vec<File>,
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Eq, Hash)]
 pub enum NodeKind {
     #[serde(rename = "file")]
     File,
 }
 
-#[derive(Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Eq, Hash)]
 /// Fully resolved node,
 /// made by taking a `File` or (in future) other kinds of nodes,
 /// finding names and tags and putting them in here.

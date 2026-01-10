@@ -4,7 +4,7 @@ use thiserror::Error;
 
 use crate::config::Config;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct OmniPath {
     pub path: Vec<String>,
     pub name: String,
@@ -121,6 +121,15 @@ impl OmniPath {
             name: self.name,
             unaliased: true,
         })
+    }
+
+    /// are you absolutely sure your path contains no aliases?
+    pub fn force_unalias(self) -> Self {
+        Self {
+            path: self.path,
+            name: self.name,
+            unaliased: true,
+        }
     }
 
     pub fn try_from_path(path: impl AsRef<Utf8Path>) -> Result<Self, Error> {

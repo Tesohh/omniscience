@@ -1,6 +1,6 @@
 * CORE
 ** TODO move tracking logic to core
-** DONE implement shallow builds
+** DONE implemenT shallow builds
 CLOSED: [2026-01-06 Tue 20:44]
 ** DONE implement partial builds
 CLOSED: [2026-01-07 Wed 14:02]
@@ -37,8 +37,8 @@ for files that DO NOT have a project associated, just ignore their requests.
 CLOSED: [2026-01-08 Thu 21:30]
 ** DONE watch for changes on all omni related files, and in that case mutate the Project
 CLOSED: [2026-01-09 Fri 20:57]
-** TODO switch to tracing instead of log
-** TODO add Real Lsp Logging
+** DONE switch to tracing instead of log
+CLOSED: [2026-01-10 Sat 13:12]
 ** TODO Add link completion
 ** TODO Add Hover
 hovering over a link will show a preview of the referenced file.
@@ -105,6 +105,7 @@ CLOSED: [2026-01-04 Sun 22:44]
 ** TODO consider removing is_already_tracked from just_track and let callers sort it out
 ** DONE Add a ~private~ property to nodes
 CLOSED: [2026-01-08 Thu 00:07]
+** TODO install shell completions with clap completions
 
 * Tasks
 ** DONE Write a function to resolve any kind of link
