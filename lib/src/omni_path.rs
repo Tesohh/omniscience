@@ -126,6 +126,10 @@ impl OmniPath {
     /// tries to apply an alias, in place.
     /// returns true if the reliasing was successful
     pub fn try_realias(&mut self, from: &str, to: impl AsRef<Utf8Path>) -> bool {
+        if !self.unaliased {
+            return false;
+        }
+
         // WARNING: may behave weirdly with prefixes etc. but shouldnt be a problem as aliases are usually relative
         let components: Vec<_> = to.as_ref().components().map(|c| c.to_string()).collect();
 
