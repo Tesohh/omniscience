@@ -123,6 +123,22 @@ impl OmniPath {
         })
     }
 
+    /// tries to apply an alias, in place.
+    /// returns true if the reliasing was successful
+    pub fn try_realias(&mut self, from: &str, to: impl AsRef<Utf8Path>) -> bool {
+        // WARNING: may behave weirdly with prefixes etc. but shouldnt be a problem as aliases are usually relative
+        let components: Vec<_> = to.as_ref().components().map(|c| c.to_string()).collect();
+
+        let starts_with = self.path.starts_with(&components);
+        if starts_with {
+            self.path
+                .splice(..components.len(), std::iter::once(from.to_string()));
+            self.unaliased = false;
+        }
+
+        starts_with
+    }
+
     /// are you absolutely sure your path contains no aliases?
     pub fn force_unalias(self) -> Self {
         Self {
@@ -271,5 +287,18 @@ mod tests {
     #[should_panic]
     fn test_tryfrom_fail() {
         OmniPath::try_from(Utf8PathBuf::from("../linalg/matrix").as_path()).unwrap();
+    }
+
+    #[test]
+    fn test_tryrealias() {
+        let mut op = OmniPath::new(vec!["cs".into(), "linear-algebra".into()], "vector".into());
+        let done = op.try_realias("linalg", "cs/linear-algebra");
+        assert!(done);
+        assert_eq!(op.path, ["linalg"]);
+
+        let mut op = OmniPath::new(vec!["cs".into(), "linear-algebra".into()], "vector".into());
+        let done = op.try_realias("rust", "cs/rust");
+        assert!(!done);
+        assert_eq!(op.path, ["cs", "linear-algebra"]);
     }
 }

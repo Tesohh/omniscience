@@ -1,6 +1,6 @@
 use camino::{Utf8Path, Utf8PathBuf};
 use itertools::Itertools;
-use omni::{config::Config, link, node, omni_path::OmniPath};
+use omni::{config::Config, node, omni_path::OmniPath};
 use thiserror::Error;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
@@ -44,6 +44,14 @@ pub fn get_possible_links(
     }
 
     // try applying aliases
+    for link in &mut links {
+        for (from, to) in &config.dir_aliases {
+            let done = link.omni_path.try_realias(from, to);
+            if done {
+                break;
+            }
+        }
+    }
 
     Ok(links)
 }
@@ -151,8 +159,7 @@ mod tests {
                     true_path: "/Users/me/docs/vault/cs/linear-algebra/matrix.typ".into()
                 },
                 LinkEntry {
-                    omni_path: OmniPath::new(vec!["linalg".into()], "vector".into())
-                        .force_unalias(),
+                    omni_path: OmniPath::new(vec!["linalg".into()], "vector".into()),
                     true_path: "/Users/me/docs/vault/cs/linear-algebra/vector.typ".into()
                 },
                 LinkEntry {
