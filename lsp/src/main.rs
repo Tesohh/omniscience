@@ -19,6 +19,6 @@ async fn main() {
         .with_filter(filter::LevelFilter::DEBUG);
     tracing_subscriber::registry().with(stderr_layer).init();
 
-    let (service, socket) = LspService::new(|client| Backend::new(client));
+    let (service, socket) = LspService::new(Backend::new);
     Server::new(stdin, stdout, socket).serve(service).await;
 }
