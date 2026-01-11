@@ -45,7 +45,7 @@ impl Backend {
             definition_provider: Some(OneOf::Left(true)),
             code_action_provider: Some(CodeActionProviderCapability::Simple(true)),
             execute_command_provider: Some(ExecuteCommandOptions {
-                commands: vec!["code_action_track".into()],
+                commands: vec!["code_action_track".into(), "code_action_build".into()],
                 ..Default::default()
             }),
             ..Default::default()
