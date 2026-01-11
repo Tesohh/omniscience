@@ -2,12 +2,10 @@ use std::str::FromStr;
 
 use camino::Utf8PathBuf;
 use thiserror::Error;
-use tower_lsp_server::LanguageServer;
 use tower_lsp_server::jsonrpc::Result;
 use tower_lsp_server::ls_types::*;
 
 use crate::backend::Backend;
-use crate::document;
 use crate::err_json_rpc_ext::ResultToJsonRpcExt;
 use crate::err_log_ext::ErrLogExt;
 
@@ -28,10 +26,7 @@ enum CodeActionTrackError {
     InvalidArgs,
 }
 
-async fn code_action_track(
-    backend: &Backend,
-    args: Vec<serde_json::Value>,
-) -> Result<Option<LSPAny>> {
+async fn code_action_track(_: &Backend, args: Vec<serde_json::Value>) -> Result<Option<LSPAny>> {
     let file_uri = args
         .first()
         .ok_or(CodeActionTrackError::InvalidArgs)
@@ -51,11 +46,6 @@ async fn code_action_track(
     };
 
     omni::track::track(&root, &file_path).rpc()?;
-
-    backend
-        .client
-        .show_message(MessageType::INFO, "Tracked file")
-        .await;
 
     Ok(None)
 }

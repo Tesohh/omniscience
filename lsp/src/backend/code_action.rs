@@ -6,7 +6,6 @@ use tower_lsp_server::jsonrpc::Result;
 use tower_lsp_server::ls_types::*;
 
 use crate::backend::Backend;
-use crate::document::Document;
 use crate::err_json_rpc_ext::ResultToJsonRpcExt;
 use crate::err_log_ext::ErrLogExt;
 
@@ -15,7 +14,7 @@ pub async fn code_action(
     params: CodeActionParams,
 ) -> Result<Option<CodeActionResponse>> {
     let uri = params.text_document.uri;
-    let document = backend.documents.get(&uri);
+    // let document = backend.documents.get(&uri);
 
     let Some(root) = Backend::find_root_from_uri(&uri, true) else {
         return Ok(None);

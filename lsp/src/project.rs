@@ -9,7 +9,7 @@ use notify::{
 use omni::{link, node};
 use serde::Deserialize;
 use thiserror::Error;
-use tower_lsp_server::{Client, ls_types::MessageType};
+use tower_lsp_server::Client;
 
 use crate::err_log_ext::ErrLogExt;
 
