@@ -177,8 +177,6 @@ impl Db {
                 let path: Utf8PathBuf = op.try_into()?;
                 let path = path.parent().expect("should always have a parent");
 
-                eprintln!("PARTPART: {}", path);
-
                 let found: Vec<&node::Node> = self
                     .nodes
                     .iter()

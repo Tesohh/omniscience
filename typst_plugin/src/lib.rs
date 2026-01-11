@@ -60,7 +60,6 @@ fn parse_link(raw_file_part: &[u8], _raw_heading_part: &[u8], alias: &[u8]) -> V
     //     .to_string()
     //     + ",ghost,ghost")
     //     .into_bytes();
-
     // return format!("{},ghost,ghost", String::from_utf8_lossy(file_part)).into_bytes();
 
     // create a FilePart from the raw dot separated one
@@ -114,9 +113,4 @@ fn parse_link(raw_file_part: &[u8], _raw_heading_part: &[u8], alias: &[u8]) -> V
             format!("{},ghost,ghost", content).into_bytes()
         }
     }
-}
-
-#[wasm_func]
-fn hello() -> Vec<u8> {
-    "hello".as_bytes().to_vec()
 }
