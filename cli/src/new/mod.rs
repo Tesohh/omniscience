@@ -48,6 +48,9 @@ pub enum Error {
 
     #[error("a file at that location already exists")]
     AlreadyExists,
+
+    #[error(transparent)]
+    CoreTrackError(#[from] omni::track::Error),
 }
 
 pub fn new(
@@ -122,7 +125,7 @@ pub fn new(
     file.write_all(new_content.as_bytes())?;
 
     // track file
-    let file_node = track::just_track(root, target)?;
+    let file_node = omni::track::track(root, target)?;
 
     // run a partial build
     // read nodes

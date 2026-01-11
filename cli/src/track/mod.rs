@@ -1,8 +1,7 @@
-use crate::{args::TrackCommand, pretty};
+use crate::args::TrackCommand;
 use camino::{Utf8Path, Utf8PathBuf};
 use omni::{
     config::Config,
-    node::{self, UserDb},
     omni_path::{self},
 };
 
@@ -37,8 +36,8 @@ pub enum Error {
     #[error("{0} is a directory")]
     IsDirectory(Utf8PathBuf),
 
-    #[error("{0} is already tracked")]
-    AlreadyTracked(Utf8PathBuf),
+    #[error(transparent)]
+    CoreTrackError(#[from] omni::track::Error),
 }
 
 pub fn track(
@@ -78,58 +77,6 @@ pub fn track(
         Err(err) => return Err(err.into()),
     };
 
-    just_track(root, target)?;
+    omni::track::track(root, target)?;
     Ok(())
-}
-
-pub fn is_already_tracked(db: &UserDb, target: impl AsRef<Utf8Path>) -> Result<bool, Error> {
-    let canonical_target = target.as_ref().canonicalize_utf8()?;
-    Ok(db
-        .files
-        .iter()
-        .filter_map(|f| match f.path.canonicalize_utf8() {
-            Ok(p) => Some(p),
-            Err(err) => {
-                pretty::warning(format!(
-                    "invalid path found in nodes.toml for id {}. error: {}",
-                    f.id, err
-                ));
-                None
-            }
-        })
-        .any(|path| path == canonical_target))
-}
-
-/// core logic of track, without all input validation.
-/// assumes target is a file and exists
-/// only check that it does is checking if the file is already tracked
-/// TODO: use a error type just for this
-pub fn just_track(
-    root: impl AsRef<Utf8Path>,
-    target: impl AsRef<Utf8Path>,
-) -> Result<node::File, Error> {
-    let target = target.as_ref().to_path_buf();
-
-    let db_path = root.as_ref().join("nodes.toml");
-    let db_file = std::fs::read(&db_path)?;
-
-    let mut db: UserDb = toml::from_slice(&db_file)?;
-
-    // Check that target it not already tracked
-    if is_already_tracked(&db, &target)? {
-        return Err(Error::AlreadyTracked(target));
-    };
-
-    let file_node = node::File {
-        id: node::Id::new(&db),
-        path: target.clone(),
-    };
-    db.files.push(file_node.clone());
-
-    // SAVEPOINT(user_db)
-
-    let new_toml = toml::to_string(&db)?;
-    std::fs::write(db_path, new_toml)?;
-
-    Ok(file_node)
 }

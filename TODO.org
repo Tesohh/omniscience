@@ -1,5 +1,6 @@
 * CORE
-** TODO move tracking logic to core
+** DONE move tracking logic to core
+CLOSED: [2026-01-11 Sun 20:43]
 ** DONE implemenT shallow builds
 CLOSED: [2026-01-06 Tue 20:44]
 ** DONE implement partial builds
