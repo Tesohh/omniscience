@@ -4,8 +4,6 @@ use tower_lsp_server::ls_types::*;
 
 use crate::backend::Backend;
 use crate::document;
-use crate::err_json_rpc_ext::ResultToJsonRpcExt;
-use crate::err_log_ext::ErrLogExt;
 
 impl LanguageServer for Backend {
     #[tracing::instrument(skip_all)]
@@ -34,7 +32,7 @@ impl LanguageServer for Backend {
     }
 
     #[tracing::instrument(skip_all)]
-    async fn hover(&self, _: HoverParams) -> Result<Option<Hover>> {
+    async fn hover(&self, params: HoverParams) -> Result<Option<Hover>> {
         Ok(Some(Hover {
             contents: HoverContents::Scalar(MarkedString::String("You're hovering!".to_string())),
             range: None,
@@ -56,9 +54,10 @@ impl LanguageServer for Backend {
         tracing::debug!("maybe_root: {:?}", maybe_root);
 
         self.documents.insert(
-            params.text_document.uri,
+            params.text_document.uri.clone(),
             document::Document {
                 project_root: maybe_root,
+                path: params.text_document.uri.path().into(),
                 version: params.text_document.version,
                 language_id: params.text_document.language_id,
                 content: ropey::Rope::from(params.text_document.text),

@@ -100,6 +100,7 @@ pub enum HeadingPart {
 }
 
 /// Generic form of an unresolved link, which is pretty much what we get straight out of the user.
+#[derive(Debug, PartialEq)]
 pub struct UnresolvedLink {
     pub from: Utf8PathBuf,
     pub file_part: FilePart,
