@@ -11,11 +11,13 @@
 ) = {
   let nodes_toml = read("/build/nodes.toml", encoding: none)
   let config_toml = read("/omni.toml", encoding: none)
+  let root = read("/build/root", encoding: none)
 
   let wasm = plugin.transition(
     wasm.init,
     nodes_toml,
     config_toml,
+    root,
   )
 
   assert.ne(title, "", message: "empty title. please provide a title.")

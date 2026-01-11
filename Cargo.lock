@@ -990,6 +990,7 @@ dependencies = [
 name = "omniscience_typst"
 version = "0.1.0"
 dependencies = [
+ "camino",
  "omni",
  "serde",
  "spin",

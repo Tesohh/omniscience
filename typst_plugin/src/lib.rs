@@ -2,6 +2,7 @@
 // be very careful on what you use here as ANYTHING that relies on IO will result in a wasm trap,
 // and you will spend 8 hours debugging it.
 
+use camino::Utf8PathBuf;
 use wasm_minimal_protocol::{initiate_protocol, wasm_func};
 
 use omni::{config::Config, link::FilePart, node};
@@ -11,12 +12,13 @@ initiate_protocol!();
 struct State {
     pub db: node::Db,
     pub config: Config,
+    pub root: Utf8PathBuf,
 }
 
 static STATE: spin::Mutex<Option<State>> = spin::Mutex::new(None);
 
 #[wasm_func]
-fn init(nodes_toml: &[u8], config_toml: &[u8]) -> Vec<u8> {
+fn init(nodes_toml: &[u8], config_toml: &[u8], raw_root: &[u8]) -> Vec<u8> {
     let maybe_db = toml::from_slice::<node::Db>(nodes_toml);
     let db = match maybe_db {
         Ok(new_db) => new_db,
@@ -29,8 +31,10 @@ fn init(nodes_toml: &[u8], config_toml: &[u8]) -> Vec<u8> {
         Err(err) => return (format!("err: {}", err)).into_bytes(),
     };
 
+    let root = Utf8PathBuf::from(String::from_utf8_lossy(raw_root).to_string());
+
     let mut guard = STATE.lock();
-    *guard = Some(State { db, config });
+    *guard = Some(State { db, config, root });
 
     b"ok".to_vec()
 }
@@ -80,7 +84,7 @@ fn parse_link(raw_file_part: &[u8], _raw_heading_part: &[u8], alias: &[u8]) -> V
 
     let maybe_node = match state
         .db
-        .find_from_filepart("TEMP....", &file_part, &state.config)
+        .find_from_filepart(&state.root, &file_part, &state.config)
     {
         Ok(node) => Some(node),
         Err(node::Error::NameNotFound(_)) => None,

@@ -68,6 +68,8 @@ pub fn init(cmd: InitCommand) -> miette::Result<(), Error> {
         typst_note_template,
     )?;
 
+    std::fs::write(path.join("build/root"), path.as_str())?;
+
     if let Some(path) = &cmd.path {
         pretty::msg(
             "init",

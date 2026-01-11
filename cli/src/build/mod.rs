@@ -100,12 +100,14 @@ pub fn build(
         }
     };
 
-    // SAVEPOINT(nodes, links)
+    // SAVEPOINT(nodes, links, root)
     let new_nodes_toml = toml::to_string(&nodes)?;
     std::fs::write(root.as_ref().join("build/nodes.toml"), new_nodes_toml)?;
 
     let new_links_toml = toml::to_string(&links)?;
     std::fs::write(root.as_ref().join("build/links.toml"), new_links_toml)?;
+
+    std::fs::write(root.as_ref().join("build/root"), root.as_ref().as_str())?;
 
     Ok(())
 }

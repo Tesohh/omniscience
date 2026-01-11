@@ -170,12 +170,13 @@ pub fn new(
 
     omni::build::partial::partial(root, config, &mut nodes, &mut links, &file_node, true)?;
 
-    // SAVEPOINT(nodes, links) after a partial build
+    // SAVEPOINT(nodes, links, root) after a partial build
     let new_nodes_toml = toml::to_string(&nodes)?;
     std::fs::write(root.join("build/nodes.toml"), new_nodes_toml)?;
 
     let new_links_toml = toml::to_string(&links)?;
     std::fs::write(root.join("build/links.toml"), new_links_toml)?;
 
+    std::fs::write(root.join("build/root"), root.as_str())?;
     Ok(())
 }

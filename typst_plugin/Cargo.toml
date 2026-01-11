@@ -12,4 +12,5 @@ wasm-minimal-protocol="0.1.0"
 omni = { path = "../lib"}
 toml.workspace = true
 serde.workspace = true
+camino.workspace = true
 spin = "0.10.0"
