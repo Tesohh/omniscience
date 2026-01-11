@@ -6,7 +6,11 @@ use miette::Diagnostic;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::{config::Config, link, node};
+use crate::{
+    config::Config,
+    link, node,
+    omni_path::{self, OmniPath},
+};
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Eq, Clone, Hash)]
 pub struct Id(pub CompactString);
@@ -115,6 +119,9 @@ pub enum Error {
 
     #[error("empty path in FilePart::PathAndName")]
     EmptyPath,
+
+    #[error(transparent)]
+    OmniPathError(#[from] omni_path::Error),
 }
 
 impl Db {
@@ -141,6 +148,7 @@ impl Db {
     /// Finds the id of a node from a FilePart
     pub fn find_from_filepart(
         &self,
+        root: impl AsRef<Utf8Path>,
         part: &link::FilePart,
         config: &Config,
     ) -> Result<&'_ Node, Error> {
@@ -160,21 +168,27 @@ impl Db {
                 }
             }
             link::FilePart::PathAndName(fake_path, name) => {
-                let path: Utf8PathBuf = if !fake_path.is_empty() {
-                    if let Some(target) = config.dir_aliases.get(&fake_path[0]) {
-                        target.components().collect() // TODO: replace with OmniPath
-                    } else {
-                        fake_path.join("/").into()
-                    }
-                } else {
+                let op = OmniPath::new(fake_path.clone(), name.clone());
+                let op = op.unalias(config)?;
+                if op.path.is_empty() {
                     return Err(Error::EmptyPath);
-                };
+                }
+
+                let path: Utf8PathBuf = op.try_into()?;
+                let path = path.parent().expect("should always have a parent");
+
+                eprintln!("PARTPART: {}", path);
 
                 let found: Vec<&node::Node> = self
                     .nodes
                     .iter()
                     .filter(|node| node.names.contains(name))
-                    .filter(|node| node.path.starts_with(&path))
+                    .filter(|node| {
+                        node.path
+                            .strip_prefix(root.as_ref())
+                            .expect("node should subbed to root")
+                            .starts_with(path)
+                    })
                     .collect();
                 if found.len() > 1 {
                     Err(Error::DuplicateName(name.clone()))
@@ -231,12 +245,12 @@ mod tests {
         };
 
         let found = db
-            .find_from_filepart(&link::FilePart::Name("vector".into()), &config)
+            .find_from_filepart("", &link::FilePart::Name("vector".into()), &config)
             .unwrap();
         assert_eq!(found.id, "id1".into());
 
         let found = db
-            .find_from_filepart(&link::FilePart::Name("borrow".into()), &config)
+            .find_from_filepart("", &link::FilePart::Name("borrow".into()), &config)
             .unwrap();
         assert_eq!(found.id, "id2".into());
     }
@@ -277,6 +291,7 @@ mod tests {
 
         let found = db
             .find_from_filepart(
+                "",
                 &link::FilePart::PathAndName(vec!["linalg".into()], "vector".into()),
                 &config,
             )
@@ -285,6 +300,7 @@ mod tests {
 
         let found = db
             .find_from_filepart(
+                "",
                 &link::FilePart::PathAndName(vec!["programming".into()], "vector".into()),
                 &config,
             )
@@ -293,7 +309,73 @@ mod tests {
 
         let found = db
             .find_from_filepart(
+                "",
                 &link::FilePart::PathAndName(vec!["programming/rust".into()], "vector".into()),
+                &config,
+            )
+            .unwrap();
+        assert_eq!(found.id, "id2".into());
+    }
+
+    #[test]
+    fn test_find_by_name_with_path_and_config_prefix() {
+        let db = Db {
+            nodes: vec![
+                Node {
+                    id: "id1".into(),
+                    path: "/Users/me/src/linear-algebra/vector.typ".into(),
+                    kind: NodeKind::File,
+                    title: "Vector".into(),
+                    names: vec!["vector".into()],
+                    tags: vec![],
+                    private: false,
+                },
+                Node {
+                    id: "id2".into(),
+                    path: "/Users/me/src/programming/rust/vector.typ".into(),
+                    kind: NodeKind::File,
+                    title: "Vector".into(),
+                    names: vec!["vector".into()],
+                    tags: vec![],
+                    private: false,
+                },
+            ],
+        };
+
+        let config = Config {
+            project: Project {
+                name: String::from("project"),
+                prefix_dir: Some("src".into()),
+            },
+            typst: config::Typst::default(),
+            dir_aliases: HashMap::from([("linalg".into(), "linear-algebra".into())]),
+        };
+
+        let found = db
+            .find_from_filepart(
+                "/Users/me",
+                &link::FilePart::PathAndName(vec!["linalg".into()], "vector".into()),
+                &config,
+            )
+            .unwrap();
+        assert_eq!(found.id, "id1".into());
+
+        let found = db
+            .find_from_filepart(
+                "/Users/me",
+                &link::FilePart::PathAndName(vec!["programming".into()], "vector".into()),
+                &config,
+            )
+            .unwrap();
+        assert_eq!(found.id, "id2".into());
+
+        let found = db
+            .find_from_filepart(
+                "/Users/me",
+                &link::FilePart::PathAndName(
+                    vec!["programming".into(), "rust".into()],
+                    "vector".into(),
+                ),
                 &config,
             )
             .unwrap();
@@ -335,7 +417,7 @@ mod tests {
             dir_aliases: HashMap::new(),
         };
 
-        db.find_from_filepart(&link::FilePart::Name("vector".into()), &config)
+        db.find_from_filepart("", &link::FilePart::Name("vector".into()), &config)
             .unwrap();
     }
 

@@ -1,4 +1,4 @@
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use miette::Diagnostic;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -119,10 +119,15 @@ pub enum Error {
 
 impl UnresolvedLink {
     /// consumes `self` to try and resolve the link.
-    pub fn try_resolve(self, config: &Config, nodes: &node::Db) -> Result<Link, Error> {
+    pub fn try_resolve(
+        self,
+        root: impl AsRef<Utf8Path>,
+        config: &Config,
+        nodes: &node::Db,
+    ) -> Result<Link, Error> {
         let from = nodes.find_abs(&self.from, config)?;
 
-        let to_target = match nodes.find_from_filepart(&self.file_part, config) {
+        let to_target = match nodes.find_from_filepart(root, &self.file_part, config) {
             Ok(node) => To::Id(node.id.clone()),
             Err(node::Error::NameNotFound(_)) => To::Ghost(self.file_part),
             Err(err) => return Err(err.into()),
@@ -206,7 +211,7 @@ mod tests {
         };
 
         assert_eq!(
-            link.try_resolve(&config, &db).unwrap(),
+            link.try_resolve("", &config, &db).unwrap(),
             Link {
                 from: "id1".into(),
                 to: To::Id("id2".into()),
@@ -229,7 +234,7 @@ mod tests {
         };
 
         assert_eq!(
-            link.try_resolve(&config, &db).unwrap(),
+            link.try_resolve("", &config, &db).unwrap(),
             Link {
                 from: "id1".into(),
                 to: To::Ghost(FilePart::Name("matrix".into())),
@@ -252,7 +257,7 @@ mod tests {
             alias: None,
         };
 
-        link.try_resolve(&config, &db).unwrap();
+        link.try_resolve("", &config, &db).unwrap();
     }
 
     #[test]

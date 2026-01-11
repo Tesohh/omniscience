@@ -52,7 +52,7 @@ pub fn partial(
                 Some(None) => {
                     continue;
                 }
-                None => match nodes.find_from_filepart(filepart, config) {
+                None => match nodes.find_from_filepart(&root, filepart, config) {
                     Ok(n) => {
                         file_parts_cache.insert(filepart.clone(), Some(n));
                         n

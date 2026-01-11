@@ -26,10 +26,11 @@ pub async fn hover(backend: &Backend, params: HoverParams) -> Result<Option<Hove
     tracing::debug!("unresolved: {unresolved:?}");
 
     let resolved = unresolved
-        .try_resolve(&project.config, &project.nodes)
+        .try_resolve(root, &project.config, &project.nodes)
         .log_err_client("error while resolving link", &backend.client)
         .await
         .rpc()?;
+    tracing::debug!("resolved: {resolved:?}");
 
     match resolved.to {
         omni::link::To::Id(id) => {

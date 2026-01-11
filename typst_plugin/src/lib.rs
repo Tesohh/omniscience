@@ -78,7 +78,10 @@ fn parse_link(raw_file_part: &[u8], _raw_heading_part: &[u8], alias: &[u8]) -> V
         FilePart::PathAndName(path, title)
     };
 
-    let maybe_node = match state.db.find_from_filepart(&file_part, &state.config) {
+    let maybe_node = match state
+        .db
+        .find_from_filepart("TEMP....", &file_part, &state.config)
+    {
         Ok(node) => Some(node),
         Err(node::Error::NameNotFound(_)) => None,
         Err(err) => return format!("err: {}", err).into_bytes(),

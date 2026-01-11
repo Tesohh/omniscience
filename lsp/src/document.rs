@@ -80,6 +80,7 @@ impl Document {
             let text = text.get_slice(6..)?.to_string();
 
             // TODO: write a dedicated func for this
+            // WHICH WE ALREADY Have called from_typst_style
             let mut raw_splits = text.split(":");
             let raw_file_part = raw_splits.next()?;
             let raw_heading_part = raw_splits.next().unwrap_or_default();
