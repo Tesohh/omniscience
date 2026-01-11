@@ -166,10 +166,6 @@ pub async fn start_watching_project(
                     };
                     project.links = links;
                 };
-
-                client
-                    .show_message(MessageType::INFO, "reloaded project")
-                    .await;
             }
         }
     }
