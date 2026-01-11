@@ -56,7 +56,7 @@ impl Document {
             let mut end = pos.character as usize;
             loop {
                 match line.get_char(end) {
-                    Some(c) if is_typst_ref_char(c) => {
+                    Some(c) if is_typst_ref_char(c) || c == '@' => {
                         end += 1;
                     }
                     _ => {
@@ -67,19 +67,22 @@ impl Document {
 
             // slice the line to get the final string
             let text = line.slice(start..end);
+            tracing::debug!("under cursor we have: {start}..{end} -> {text}");
 
             // does it start with @omni.link?
             // if not, return None
-            let preamble = text.slice(0..6);
+            let preamble = text.get_slice(0..6)?;
             if preamble != "@omni." {
                 return None;
             }
 
             // build the UnresolvedLink
-            let text = text.slice(6..).to_string();
+            let text = text.get_slice(6..)?.to_string();
 
             // TODO: write a dedicated func for this
-            let (raw_file_part, raw_heading_part) = text.split_once(":")?;
+            let mut raw_splits = text.split(":");
+            let raw_file_part = raw_splits.next()?;
+            let raw_heading_part = raw_splits.next().unwrap_or_default();
 
             let file_splits: Vec<_> = raw_file_part.split('.').collect();
             let file_part = if file_splits.is_empty() {

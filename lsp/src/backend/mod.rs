@@ -1,5 +1,6 @@
 mod completion;
 mod find_root;
+mod hover;
 mod language_server;
 mod register_project;
 

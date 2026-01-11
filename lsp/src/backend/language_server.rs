@@ -33,10 +33,7 @@ impl LanguageServer for Backend {
 
     #[tracing::instrument(skip_all)]
     async fn hover(&self, params: HoverParams) -> Result<Option<Hover>> {
-        Ok(Some(Hover {
-            contents: HoverContents::Scalar(MarkedString::String("You're hovering!".to_string())),
-            range: None,
-        }))
+        crate::backend::hover::hover(self, params).await
     }
 
     #[tracing::instrument(skip_all)]

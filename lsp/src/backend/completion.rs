@@ -20,13 +20,13 @@ pub async fn completion(
     }
 
     let uri = params.text_document_position.text_document.uri;
-    let Some(root) = Backend::find_root_from_uri(&uri) else {
-        return Ok(None);
-    };
-    let Some(project) = backend.projects.get(&root) else {
-        return Ok(None);
-    };
     let Some(document) = backend.documents.get(&uri) else {
+        return Ok(None);
+    };
+    let Some(root) = &document.project_root else {
+        return Ok(None);
+    };
+    let Some(project) = backend.projects.get(root) else {
         return Ok(None);
     };
 
