@@ -1,5 +1,6 @@
 mod completion;
 mod find_root;
+mod goto_definition;
 mod hover;
 mod language_server;
 mod register_project;
@@ -39,6 +40,7 @@ impl Backend {
             text_document_sync: Some(TextDocumentSyncCapability::Kind(
                 TextDocumentSyncKind::INCREMENTAL,
             )),
+            definition_provider: Some(OneOf::Left(true)),
             ..Default::default()
         }
     }

@@ -37,6 +37,14 @@ impl LanguageServer for Backend {
     }
 
     #[tracing::instrument(skip_all)]
+    async fn goto_definition(
+        &self,
+        params: GotoDefinitionParams,
+    ) -> Result<Option<GotoDefinitionResponse>> {
+        crate::backend::goto_definition::goto_definition(self, params).await
+    }
+
+    #[tracing::instrument(skip_all)]
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
         tracing::debug!("client did open {}", params.text_document.uri.as_str());
 

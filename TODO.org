@@ -44,8 +44,10 @@ CLOSED: [2026-01-10 Sat 13:12]
 CLOSED: [2026-01-10 Sat 21:53]
 ** DONE instead of breaking the whole completion, just remove problematic entries
 CLOSED: [2026-01-10 Sat 22:26]
-** TODO add functuon to get link under cursor
-** TODO Add Hover
+** DONE add functuon to get link under cursor
+CLOSED: [2026-01-11 Sun 16:20]
+** DONE Add Hover
+CLOSED: [2026-01-11 Sun 16:20]
 hovering over a link will show a preview of the referenced file.
 ** TODO Add link go to definition
 ** TODO Add code action to pretty much run ~new~
