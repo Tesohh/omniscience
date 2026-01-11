@@ -14,6 +14,7 @@ omni = { path = "../lib" }
 tracing = { version = "0.1.44" }
 tracing-subscriber = { version = "0.3" }
 tracing-appender = "0.2"
+serde_json.workspace = true
 dashmap = "6.1.0"
 ropey = "1.6.1"
 itertools = { version = "0.14.0" }

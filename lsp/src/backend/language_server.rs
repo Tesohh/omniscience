@@ -45,10 +45,15 @@ impl LanguageServer for Backend {
     }
 
     #[tracing::instrument(skip_all)]
+    async fn code_action(&self, params: CodeActionParams) -> Result<Option<CodeActionResponse>> {
+        crate::backend::code_action::code_action(self, params).await
+    }
+
+    #[tracing::instrument(skip_all)]
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
         tracing::debug!("client did open {}", params.text_document.uri.as_str());
 
-        let maybe_root = Self::find_root_from_uri(&params.text_document.uri);
+        let maybe_root = Self::find_root_from_uri(&params.text_document.uri, true);
         if let Some(root) = &maybe_root {
             let _ = self
                 .register_project(root)

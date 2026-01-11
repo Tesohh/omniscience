@@ -1,3 +1,4 @@
+mod code_action;
 mod completion;
 mod find_root;
 mod goto_definition;
@@ -41,6 +42,7 @@ impl Backend {
                 TextDocumentSyncKind::INCREMENTAL,
             )),
             definition_provider: Some(OneOf::Left(true)),
+            code_action_provider: Some(CodeActionProviderCapability::Simple(true)),
             ..Default::default()
         }
     }
