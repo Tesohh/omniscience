@@ -51,8 +51,15 @@ CLOSED: [2026-01-11 Sun 16:20]
 hovering over a link will show a preview of the referenced file.
 ** DONE Add link go to definition
 CLOSED: [2026-01-11 Sun 16:54]
-** TODO Add code action to pretty much run ~new~
+** DONE Add code action to pretty much run ~new~
+CLOSED: [2026-01-11 Sun 19:27]
 (apply template, track, and run partial build)
+** TODO Separate apply template and track
+- code action like "Apply template `note` and track"
+  - applies an edit, containing the whole template
+  - executes a "track" command which just adds the node to nodes.toml
+- code action like "Build"
+  - builds the file and then says "done"
 ** TODO Add link go to references 
 ** TODO Listen to LSP file renames/moves
 ** TODO switch to LSP client for file watching

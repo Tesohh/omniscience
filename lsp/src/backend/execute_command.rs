@@ -66,9 +66,5 @@ async fn code_action_new(
         },
     )
     .rpc()?;
-
-    // backend.client.send_request().await;
-    // backend.client.send_notification(params)
-
     Ok(None)
 }
