@@ -21,7 +21,10 @@ pub enum Error {
 }
 
 fn is_already_tracked(db: &node::UserDb, target: impl AsRef<Utf8Path>) -> Result<bool, Error> {
-    let canonical_target = target.as_ref().canonicalize_utf8()?;
+    let canonical_target = match target.as_ref().canonicalize_utf8() {
+        Ok(v) => v,
+        Err(_) => return Ok(false), // can't be already tracked if it doesnt exist
+    };
     Ok(db
         .files
         .iter()
