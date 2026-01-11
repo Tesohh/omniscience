@@ -847,6 +847,7 @@ dependencies = [
  "ropey",
  "serde",
  "serde_json",
+ "tera",
  "thiserror",
  "tokio",
  "toml",

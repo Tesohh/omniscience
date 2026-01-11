@@ -35,6 +35,10 @@ impl Document {
             // else return None
             let mut start = pos.character as usize;
             loop {
+                if start == 0 {
+                    break;
+                }
+
                 match line.get_char(start) {
                     Some(c) if is_typst_ref_char(c) => {
                         start -= 1;

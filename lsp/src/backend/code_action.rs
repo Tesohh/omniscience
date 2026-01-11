@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use camino::Utf8Path;
+use camino::{Utf8Path, Utf8PathBuf};
+use tera::Tera;
 use tower_lsp_server::jsonrpc::Result;
 use tower_lsp_server::ls_types::*;
 
@@ -53,14 +54,35 @@ async fn get_template_actions(
             .await
         {
             Ok(Some(entry)) => {
-                let path = entry.path();
-                let Some(stem) = path.file_stem() else {
+                let template_path = entry.path();
+                let Some(stem) = template_path.file_stem() else {
                     continue;
                 };
 
+                // if the extension does not match just go on
+                let my_path: Utf8PathBuf = uri.path().into();
+                if let Some(my_ext) = my_path.extension()
+                    && let Some(other_ext) = template_path.extension()
+                    && my_ext != other_ext
+                {
+                    continue;
+                }
+
+                // get the template
+                let template_name = stem.to_os_string().to_string_lossy().to_string();
+                let (template, _) =
+                    omni::get_template::get_template(&root, &template_name).rpc()?;
+
                 let target_arg = serde_json::Value::String(uri.to_string());
-                let template_arg =
-                    serde_json::Value::String(stem.to_os_string().to_string_lossy().to_string());
+
+                // prepare the template
+                let mut context = tera::Context::new();
+                let title = my_path.file_stem().unwrap_or_default();
+                context.insert("title", title);
+                context.insert("name", title);
+
+                // render the template
+                let content = Tera::one_off(&template, &context, false).rpc()?;
 
                 commands.push(CodeActionOrCommand::CodeAction(CodeAction {
                     title: format!("Apply template \"{}\" and track", stem.display()),
@@ -73,7 +95,7 @@ async fn get_template_actions(
                                     start: Position::new(0, 0),
                                     end: Position::new(0, 0),
                                 },
-                                new_text: "TODO TEMPLAET".to_string(),
+                                new_text: content,
                             }],
                         )])),
                         ..Default::default()
