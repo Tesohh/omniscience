@@ -41,13 +41,14 @@ pub async fn code_action(
                     continue;
                 };
 
-                let value =
+                let target_arg = serde_json::Value::String(uri.to_string());
+                let template_arg =
                     serde_json::Value::String(stem.to_os_string().to_string_lossy().to_string());
 
                 commands.push(CodeActionOrCommand::Command(Command {
                     title: format!("Create new {}", stem.display()),
                     command: "code_action_new".into(),
-                    arguments: Some(vec![value]),
+                    arguments: Some(vec![target_arg, template_arg]),
                 }));
             }
             Ok(None) => break,

@@ -50,6 +50,11 @@ impl LanguageServer for Backend {
     }
 
     #[tracing::instrument(skip_all)]
+    async fn execute_command(&self, params: ExecuteCommandParams) -> Result<Option<LSPAny>> {
+        crate::backend::execute_command::execute_command(self, params).await
+    }
+
+    #[tracing::instrument(skip_all)]
     async fn did_open(&self, params: DidOpenTextDocumentParams) {
         tracing::debug!("client did open {}", params.text_document.uri.as_str());
 

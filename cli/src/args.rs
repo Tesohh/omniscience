@@ -40,6 +40,9 @@ pub struct NewCommand {
     pub path: Utf8PathBuf,
     #[arg(long)]
     pub raw: bool,
+    #[arg(long)]
+    /// if set, will overwrite an existing file.
+    pub overwrite: bool,
 }
 
 #[derive(clap::Parser, Debug)]

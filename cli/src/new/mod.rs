@@ -12,22 +12,22 @@ use crate::{args::NewCommand, pretty, track};
 
 #[derive(thiserror::Error, miette::Diagnostic, Debug)]
 pub enum Error {
-    #[error("template error")]
+    #[error(transparent)]
     TemplateError(#[from] tera::Error),
 
-    #[error("io error")]
+    #[error(transparent)]
     IoError(#[from] std::io::Error),
 
-    #[error("omni path error")]
+    #[error(transparent)]
     OmniPathError(#[from] omni_path::Error),
 
-    #[error("toml deserialization error")]
+    #[error(transparent)]
     TomlDeserializeError(#[from] toml::de::Error),
 
-    #[error("toml serialization error")]
+    #[error(transparent)]
     TomlSerializeError(#[from] toml::ser::Error),
 
-    #[error("track error")]
+    #[error(transparent)]
     TrackError(#[from] track::Error),
 
     #[error(transparent)]
@@ -123,12 +123,16 @@ pub fn new(
     pretty::debug(format!("target: {}", target));
 
     // create the file
-    let mut file = match std::fs::File::create_new(&target) {
-        Ok(file) => file,
-        Err(err) if err.kind() == std::io::ErrorKind::AlreadyExists => {
-            return Err(Error::AlreadyExists);
+    let mut file = if cmd.overwrite {
+        std::fs::File::create(&target)?
+    } else {
+        match std::fs::File::create_new(&target) {
+            Ok(file) => file,
+            Err(err) if err.kind() == std::io::ErrorKind::AlreadyExists => {
+                return Err(Error::AlreadyExists);
+            }
+            Err(err) => return Err(err)?,
         }
-        Err(err) => return Err(err)?,
     };
 
     // apply template

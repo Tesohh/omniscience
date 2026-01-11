@@ -1,5 +1,6 @@
 mod code_action;
 mod completion;
+mod execute_command;
 mod find_root;
 mod goto_definition;
 mod hover;
@@ -43,6 +44,10 @@ impl Backend {
             )),
             definition_provider: Some(OneOf::Left(true)),
             code_action_provider: Some(CodeActionProviderCapability::Simple(true)),
+            execute_command_provider: Some(ExecuteCommandOptions {
+                commands: vec!["code_action_new".into()],
+                ..Default::default()
+            }),
             ..Default::default()
         }
     }
