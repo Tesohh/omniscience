@@ -51,8 +51,9 @@ pub async fn hover(backend: &Backend, params: HoverParams) -> Result<Option<Hove
                 contents: HoverContents::Markup(MarkupContent {
                     kind: MarkupKind::Markdown,
                     value: format!(
-                        "`{}`\n\n```{}\n{}\n```",
-                        node.path,
+                        "omni node `{}` at **{}**\n\n```{}\n{}\n```",
+                        node.id,
+                        node.path.strip_prefix(root).unwrap_or(&node.path),
                         node.path.extension().unwrap_or_default(),
                         content
                     ),

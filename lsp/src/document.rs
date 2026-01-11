@@ -1,8 +1,5 @@
 use camino::Utf8PathBuf;
-use omni::{
-    link::{self, FilePart, HeadingPart},
-    node,
-};
+use omni::link::{self, FilePart, HeadingPart};
 use tower_lsp_server::ls_types;
 
 #[derive(Debug)]
