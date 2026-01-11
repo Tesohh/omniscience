@@ -14,7 +14,6 @@ pub async fn code_action(
     params: CodeActionParams,
 ) -> Result<Option<CodeActionResponse>> {
     let uri = params.text_document.uri;
-    // let document = backend.documents.get(&uri);
 
     let Some(root) = Backend::find_root_from_uri(&uri, true) else {
         return Ok(None);
@@ -22,8 +21,27 @@ pub async fn code_action(
 
     let mut commands = vec![];
     commands.extend(get_template_actions(backend, &uri, &root).await?);
+    commands.extend(get_build_actions(backend, &uri, &root).await?);
 
     Ok(Some(commands))
+}
+
+async fn get_build_actions(
+    backend: &Backend,
+    uri: &Uri,
+    root: impl AsRef<Utf8Path>,
+) -> Result<Option<CodeActionOrCommand>> {
+    if !backend.projects.contains_key(&root.as_ref().to_path_buf()) {
+        return Ok(None);
+    };
+
+    let target_arg = serde_json::Value::String(uri.to_string());
+
+    Ok(Some(CodeActionOrCommand::Command(Command {
+        title: "Build".into(),
+        command: "code_action_build".into(),
+        arguments: Some(vec![target_arg]),
+    })))
 }
 
 async fn get_template_actions(
