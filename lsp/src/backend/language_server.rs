@@ -82,7 +82,7 @@ impl LanguageServer for Backend {
 
     #[tracing::instrument(skip_all)]
     async fn did_change(&self, params: DidChangeTextDocumentParams) {
-        tracing::debug!("client did change {}", params.text_document.uri.as_str());
+        // tracing::debug!("client did change {}", params.text_document.uri.as_str());
 
         for change in params.content_changes {
             if let Some(range) = change.range {

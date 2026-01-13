@@ -1,3 +1,4 @@
+use omni::node;
 use tower_lsp_server::jsonrpc::Result;
 use tower_lsp_server::ls_types::*;
 
@@ -26,24 +27,19 @@ pub async fn goto_definition(
         None => return Ok(None),
     };
 
-    tracing::debug!("unresolved: {unresolved:?}");
+    // TODO: switch to resolve_link without the from part
+    let maybe_node =
+        match project
+            .nodes
+            .find_from_filepart(&root, &unresolved.file_part, &project.config)
+        {
+            Ok(node) => Some(node),
+            Err(node::Error::NameNotFound(_)) => None,
+            Err(_) => return Ok(None),
+        };
 
-    let resolved = unresolved
-        .try_resolve(root, &project.config, &project.nodes)
-        .log_err_client("error while resolving link", &backend.client)
-        .await
-        .rpc()?;
-    tracing::debug!("resolved: {resolved:?}");
-
-    match resolved.to {
-        omni::link::To::Id(id) => {
-            let node = project
-                .nodes
-                .find_from_id(&id, &project.config)
-                .log_err_client("error while fetching node by id", &backend.client)
-                .await
-                .rpc()?;
-
+    match maybe_node {
+        Some(node) => {
             let target_uri = match Uri::from_file_path(node.path.clone()) {
                 Some(v) => v,
                 None => {
@@ -69,7 +65,7 @@ pub async fn goto_definition(
                 },
             })))
         }
-        omni::link::To::Ghost(_) => {
+        None => {
             backend
                 .client
                 .show_message(MessageType::INFO, "ghost")

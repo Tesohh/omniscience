@@ -1,3 +1,4 @@
+use omni::node;
 use tower_lsp_server::jsonrpc::Result;
 use tower_lsp_server::ls_types::*;
 
@@ -25,22 +26,21 @@ pub async fn hover(backend: &Backend, params: HoverParams) -> Result<Option<Hove
 
     tracing::debug!("unresolved: {unresolved:?}");
 
-    let resolved = unresolved
-        .try_resolve(root, &project.config, &project.nodes)
-        .log_err_client("error while resolving link", &backend.client)
-        .await
-        .rpc()?;
-    tracing::debug!("resolved: {resolved:?}");
+    // TODO: switch to resolve_link without the from part
+    let maybe_node =
+        match project
+            .nodes
+            .find_from_filepart(&root, &unresolved.file_part, &project.config)
+        {
+            Ok(node) => Some(node),
+            Err(node::Error::NameNotFound(_)) => None,
+            Err(_) => return Ok(None),
+        };
 
-    match resolved.to {
-        omni::link::To::Id(id) => {
-            let node = project
-                .nodes
-                .find_from_id(&id, &project.config)
-                .log_err_client("error while fetching node by id", &backend.client)
-                .await
-                .rpc()?;
+    // tracing::debug!("resolved: {resolved:?}");
 
+    match maybe_node {
+        Some(node) => {
             let content = tokio::fs::read_to_string(&node.path)
                 .await
                 .log_err_client("unable to read file", &backend.client)
@@ -61,7 +61,7 @@ pub async fn hover(backend: &Backend, params: HoverParams) -> Result<Option<Hove
                 range: None, // TODO: when we have heading parts we need to take this into consideration
             }))
         }
-        omni::link::To::Ghost(_) => Ok(Some(Hover {
+        None => Ok(Some(Hover {
             contents: HoverContents::Markup(MarkupContent {
                 kind: MarkupKind::Markdown,
                 value: "Ghost".into(),
