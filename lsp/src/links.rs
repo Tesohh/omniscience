@@ -1,6 +1,6 @@
 use camino::{Utf8Path, Utf8PathBuf};
 use itertools::Itertools;
-use omni::{config::Config, node, omni_path::OmniPath};
+use omni::{config::Config, link, node, omni_path::OmniPath};
 use thiserror::Error;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
@@ -117,6 +117,21 @@ fn dedup(
     }
 
     Ok(edited)
+}
+
+pub fn get_ghost_links(
+    _root: impl AsRef<Utf8Path>,
+    _config: &Config,
+    links: &link::Db,
+) -> impl Iterator<Item = (OmniPath,)> {
+    links
+        .links
+        .iter()
+        .filter_map(|l| match &l.to {
+            link::To::Id(_) => None,
+            link::To::Ghost(file_part) => Some((OmniPath::from(file_part.clone()),)),
+        })
+        .unique()
 }
 
 #[cfg(test)]

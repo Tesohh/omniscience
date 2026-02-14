@@ -2,7 +2,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use miette::Diagnostic;
 use thiserror::Error;
 
-use crate::config::Config;
+use crate::{config::Config, link};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct OmniPath {
@@ -69,6 +69,16 @@ impl TryFrom<&Utf8Path> for OmniPath {
         let name = path.pop().ok_or(Error::EmptyPathInConversionFromPath)?;
 
         Ok(OmniPath::new(path, name))
+    }
+}
+
+impl From<link::FilePart> for OmniPath {
+    /// Consumes a filepart to transform it into a omni path
+    fn from(value: link::FilePart) -> Self {
+        match value {
+            link::FilePart::Name(name) => Self::new(vec![], name),
+            link::FilePart::PathAndName(items, name) => Self::new(items, name),
+        }
     }
 }
 

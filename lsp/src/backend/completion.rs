@@ -48,15 +48,26 @@ pub async fn completion(
                 .show_err_client("cmp err", &backend.client)
                 .await
                 .rpc()?;
-            let completions: Vec<CompletionItem> = links
-                .iter()
-                .map(|l| CompletionItem {
-                    label: l.omni_path.as_typst_style(),
-                    kind: Some(CompletionItemKind::FILE),
 
-                    ..Default::default()
-                })
-                .collect();
+            let ghost_links = crate::links::get_ghost_links(root, &project.config, &project.links);
+
+            let real_completions = links.iter().map(|l| CompletionItem {
+                label: l.omni_path.as_typst_style(),
+                kind: Some(CompletionItemKind::FILE),
+
+                ..Default::default()
+            });
+
+            let ghost_completions = ghost_links.map(|(p,)| CompletionItem {
+                label: p.as_typst_style(),
+                kind: Some(CompletionItemKind::KEYWORD),
+
+                ..Default::default()
+            });
+
+            let completions: Vec<CompletionItem> =
+                real_completions.chain(ghost_completions).collect();
+
             let response = CompletionResponse::Array(completions);
             Ok(Some(response))
         }

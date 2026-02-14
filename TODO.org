@@ -16,7 +16,6 @@ Easy solution:
 ** DONE separate typst build logic
 CLOSED: [2026-01-06 Tue 14:07]
 ** DONE fix typst::compile outputting empty files
-
 CLOSED: [2026-01-07 Wed 18:28]
 this is actually intended behaviour, as the files with the ghost links are never built, and thus their links are never added
 ** DONE add FULL CLI build
@@ -27,7 +26,13 @@ CLOSED: [2026-01-07 Wed 23:43]
 CLOSED: [2026-01-07 Wed 23:43]
 ** DONE use https://github.com/ParkMyCar/compact_str for IDs
 CLOSED: [2026-01-07 Wed 23:54]
-** TODO remove dangling nodes (exist in build but not in user db) BEFORE a full build
+** TODO remove dangling nodes (exist in build db but not in user db) BEFORE a full build
+** TODO use typst library instead of using typst cli for building
+** TODO alias map; each name has an associated alias
+so for example
+matrix -> Matrix
+matrices -> Matrices
+** TODO get rid of filepart (and headerpart), only use OmniPath
 * LSP
 ** DONE keep document synchronized
 CLOSED: [2026-01-08 Thu 18:33]
@@ -62,18 +67,21 @@ CLOSED: [2026-01-11 Sun 20:55]
   - executes a "track" command which just adds the node to nodes.toml
 - code action like "Build"
   - builds the file and then says "done"
-** TODO add BUILD code action
+** DONE add BUILD code action
+CLOSED: [2026-01-24 Sat 14:18]
+** DONE Complete with previously used ghost links too 
+CLOSED: [2026-02-14 Sat 10:02]
 ** TODO Add link go to references 
 ** TODO Listen to LSP file renames/moves
-** TODO switch to LSP client for file watching
+** TODO use LSP client for file watching
 https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#workspace_didChangeWatchedFiles
+** TODO need a "Node search", perhaps with leader S?
 * TYPST PLUGIN
 ** DONE make the links show the title of the node
 CLOSED: [2026-01-08 Thu 00:47]
 ** DONE show something for ghost links
 CLOSED: [2026-01-08 Thu 00:47]
 ** TODO make the links actually point to something (when we have SSG?)
-
 * CLI
 ** DONE what to do with ~src~?
 CLOSED: [2026-01-04 Sun 13:25]
@@ -130,6 +138,10 @@ CLOSED: [2026-01-08 Thu 00:07]
 
 ** TODO add a ~clean~ command that resets ~build/~
 ** TODO add a ~--clean~ flag to ~build~
+* DOCS
+** TODO Mention https://github.com/Jollywatt/notes
+* SSG
+** TODO when publishing my personal notes, ask professors if it's fine to include small screenshots from their powerpoints
 * Tasks
 ** DONE Write a function to resolve any kind of link
 ** DONE test said function
@@ -342,7 +354,8 @@ because in typst we can just use labels for this.
 but it might be useful for other formats, so i guess we should keep it?
 ** DONE look into WASM for writing a function for resolving links that typst can use too
 CLOSED: [2025-12-28 Sun 13:49]
-** TODO How to gather links
+** DONE How to gather links
+CLOSED: [2026-01-24 Sat 14:20]
 - [ ] Typst
   - [ ] Normalize at typst-compile time AND add links as #metadata (with WASM)
   - [ ] Gather at omni-build time (with typst query)
@@ -354,4 +367,3 @@ CLOSED: [2025-12-28 Sun 13:49]
   - [ ] Keep in mind that we also have to parse regular wiki links and even regular md links.
 - [ ] Org
   - [ ] Similar to markdown but different libraries.
-** TODO lsp needs the ghost links for completions too.
