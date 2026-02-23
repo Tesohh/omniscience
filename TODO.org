@@ -33,6 +33,7 @@ so for example
 matrix -> Matrix
 matrices -> Matrices
 ** TODO get rid of filepart (and headerpart), only use OmniPath
+** TODO #A the user db should NOT contain absolute paths!!! critical critical!!
 * LSP
 ** DONE keep document synchronized
 CLOSED: [2026-01-08 Thu 18:33]

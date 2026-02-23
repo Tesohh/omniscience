@@ -53,7 +53,10 @@ pub fn track(
 
     let file_node = node::File {
         id: node::Id::new(&db),
-        path: target.clone(),
+        path: target
+            .strip_prefix(root.as_ref())
+            .map_err(|_| Error::OutsideRoot)?
+            .into(),
     };
     db.files.push(file_node.clone());
 

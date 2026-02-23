@@ -55,11 +55,6 @@ fn parse_link(raw_file_part: &[u8], _raw_heading_part: &[u8], alias: &[u8]) -> V
         None => return "err: state is None. There might have been an error while parsing the config or the db.".into(),
     };
 
-    // return (toml::to_string_pretty(&state.db)
-    //     .unwrap_or("NOTHING".to_string())
-    //     .to_string()
-    //     + ",ghost,ghost")
-    //     .into_bytes();
     // return format!("{},ghost,ghost", String::from_utf8_lossy(file_part)).into_bytes();
 
     // create a FilePart from the raw dot separated one
@@ -101,6 +96,12 @@ fn parse_link(raw_file_part: &[u8], _raw_heading_part: &[u8], alias: &[u8]) -> V
                 &String::from_utf8_lossy(alias).to_string()
             };
 
+            // return (toml::to_string_pretty(&state.db)
+            //     .unwrap_or("NOTHING".to_string())
+            //     .to_string()
+            //     + ",ghost,ghost")
+            //     .into_bytes();
+            //
             format!("{},{},{}", content, node.path, node.id.0).into_bytes()
         }
         None => {

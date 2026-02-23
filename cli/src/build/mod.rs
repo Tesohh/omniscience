@@ -10,7 +10,7 @@ use crate::{args::BuildCommand, pretty};
 
 #[derive(thiserror::Error, miette::Diagnostic, Debug)]
 pub enum Error {
-    #[error("aiosjdioas {0}")]
+    #[error(transparent)]
     IoError(#[from] std::io::Error),
 
     #[error(transparent)]
@@ -52,6 +52,7 @@ pub fn build(
     config: &Config,
     cmd: BuildCommand,
 ) -> miette::Result<(), Error> {
+    pretty::info("read configs");
     let user_db: node::UserDb = {
         let db_file = std::fs::read(root.as_ref().join("nodes.toml"))?;
         toml::from_slice(&db_file)?
@@ -85,14 +86,17 @@ pub fn build(
                 .map(|(f, _)| f)
                 .ok_or(node::Error::UntrackedNode(path))?;
 
+            pretty::info(format!("partial {}", file.path));
             partial(&root, config, &mut nodes, &mut links, file, true)?;
         }
         None => {
             for file in &user_db.files {
+                pretty::info(format!("partial {}", file.path));
                 partial(&root, config, &mut nodes, &mut links, file, false)?
             }
 
             let root_as_ref = root.as_ref();
+            pretty::info("build all");
             user_db
                 .files
                 .par_iter()
