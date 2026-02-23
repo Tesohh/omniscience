@@ -28,6 +28,13 @@ CLOSED: [2026-01-07 Wed 23:43]
 CLOSED: [2026-01-07 Wed 23:54]
 ** TODO remove dangling nodes (exist in build db but not in user db) BEFORE a full build
 ** TODO use typst library instead of using typst cli for building
+- use something to provide a ~&World~ (eg https://github.com/tfachmann/typst-as-library/tree/main)
+- Compile documents and keep them somewhere.
+- The same document can be
+    - Queried
+    - Compiled to PDF
+    - Compiled to HTML
+- so we have to rethink how full builds work a little.
 ** TODO alias map; each name has an associated alias
 so for example
 matrix -> Matrix
