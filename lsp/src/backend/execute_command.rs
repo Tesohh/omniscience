@@ -59,6 +59,11 @@ async fn code_action_build(
     };
 
     let path_canonical = file_path.canonicalize_utf8().rpc()?;
+    tracing::debug!(
+        "AXIOM im looking for {file_path}, canonicalized as {path_canonical}, which originally was {}",
+        uri.as_str()
+    );
+
     let file = project
         .user_nodes
         .files
